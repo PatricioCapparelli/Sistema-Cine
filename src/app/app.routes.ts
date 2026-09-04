@@ -1,27 +1,14 @@
 import { Routes } from '@angular/router';
-import { logueadoGuard } from './core/guards/logueado.guard'; 
+import { publicRoutes } from './public/public.routes';
+import { logueadoGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
+    ...publicRoutes,
     {
-        path: 'public',
-        loadChildren: () => import('./public/public.routes').then((m) => m.pub)
+        path: 'admin/peliculas',
+        loadComponent: () => import('./admin/abm-peliculas/abm-peliculas').then(m => m.AbmPeliculasComponent),
+        canActivate: [logueadoGuard]
     },
-    {
-        path: 'auth',
-        loadChildren: () => import('./auth/auth.routes').then(m => m.authRoutes)
-    },
-    {
-        path: 'admin',
-        loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes),
-        canActivate: [logueadoGuard] 
-    },
-    {
-        path: 'reserva',
-        loadChildren: () => import('./reserva/reserva.routes').then(m => m.reservaRoutes)
-    },
-    {
-        path: '',
-        redirectTo: 'public', 
-        pathMatch: 'full'
-    }
+    { path: '', redirectTo: 'cartelera', pathMatch: 'full' },
+    { path: '**', redirectTo: 'cartelera' }
 ];

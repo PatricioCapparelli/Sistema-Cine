@@ -1,0 +1,64 @@
+<div class="admin-container">
+    <h2>Cargar Nueva Pelicula</h2>
+    
+    <form [formGroup]="peliculaForm" (ngSubmit)="guardarPelicula()">
+        <div class="form-group">
+            <label for="nombre">Nombre de la Pelicula:</label>
+            <input type="text" id="nombre" formControlName="nombre" placeholder="Scarface">
+        </div>
+
+        <div class="form-group">
+            <label for="sinopsis">Sinopsis:</label>
+            <textarea id="sinopsis" formControlName="sinopsis" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="imagen_url">URL del Poster:</label>
+            <input type="url" id="imagen_url" formControlName="imagen_url" placeholder="https://ejemplo.com/poster.jpg">
+        </div>
+
+        <div class="form-group">
+            <label for="duracion_min">Duracion:</label>
+            <input type="number" id="duracion_min" formControlName="duracion_min">
+        </div>
+
+        <button type="submit" [disabled]="peliculaForm.invalid">
+            Guardar en Base de Datos
+        </button>
+    </form>
+</div>
+
+<hr>
+
+<div class="lista-container">
+    <h2>Peliculas en Cartelera</h2>
+
+    <table class="tabla-admin">
+        <thead>
+            <tr>
+                <th>Poster</th>
+                <th>Nombre</th>
+                <th>Duracion</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (pelicula of listaPeliculas; track pelicula.id) {
+                <tr>
+                    <td>
+                        <img [src]="pelicula.imagen_url" alt="Poster">
+                    </td>
+                    <td>{{ pelicula.nombre }}</td>
+                    <td>{{ pelicula.duracion_min }} min</td>
+                    <td>
+                        <button (click)="borrarPelicula(pelicula.id)">Eliminar</button>
+                    </td>
+                </tr>
+            } @empty {
+                <tr>
+                    <td colspan="4">No hay peliculas cargadas todavia.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

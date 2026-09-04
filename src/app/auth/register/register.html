@@ -1,1 +1,49 @@
-<p>register works!</p>
+<div class="auth-container">
+    <h2>Registro de Usuario</h2>
+    
+    <form [formGroup]="registroForm" (ngSubmit)="registrar()">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" formControlName="email">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" formControlName="password">
+        </div>
+
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" formControlName="nombre">
+        </div>
+
+        <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" formControlName="apellido">
+        </div>
+
+        <div class="form-group">
+            <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+            <input type="date" id="fecha_nacimiento" formControlName="fecha_nacimiento">
+        </div>
+
+        <div class="form-group">
+            <label for="tipo_sangre">Tipo de Sangre:</label>
+            <input type="text" id="tipo_sangre" formControlName="tipo_sangre">
+        </div>
+
+        <div class="form-group">
+            <label for="color_ojos">Color de Ojos:</label>
+            <input type="text" id="color_ojos" formControlName="color_ojos">
+        </div>
+
+        <div class="form-group">
+            <label for="dias_vacaciones">Dias de Vacaciones por Año:</label>
+            <input type="number" id="dias_vacaciones" formControlName="dias_vacaciones">
+        </div>
+
+        <button type="submit" [disabled]="registroForm.invalid">
+            Crear Cuenta
+        </button>
+    </form>
+</div>

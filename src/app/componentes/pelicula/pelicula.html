@@ -1,0 +1,12 @@
+<div class="card">
+    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" />
+
+    <div class="card-body">
+        <h3>{{ peliculaInput()?.nombre }}</h3>
+        <p><strong>Duracion:</strong> {{ peliculaInput()?.duracion_min }} min</p>
+        <p>{{ peliculaInput()?.sinopsis }}</p>
+
+        <!-- Aquí luego podrías usar routerLink para ir a la compra -->
+        <button>Ver Funciones</button>
+    </div>
+</div>

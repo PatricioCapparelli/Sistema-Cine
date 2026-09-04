@@ -1,0 +1,7 @@
+<div class="cartelera">
+    @for (p of peliculas; track $index) {
+    <app-pelicula [peliculaInput]="p"></app-pelicula>
+    } @empty {
+    <p>No hay peliculas en cartelera.</p>
+    }
+</div>
