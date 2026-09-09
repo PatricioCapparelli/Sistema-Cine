@@ -6,22 +6,24 @@
         <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos }} min</p>
         <p>{{ peliculaInput()?.sinopsis }}</p>
 
-        <div class="horarios-lista">
-            <h4>Horarios disponibles:</h4>
+        @if (modoAdmin()) {
+            <button (click)="onEliminar()">
+                Eliminar Pelicula
+            </button>
+        } @else {
             
-            @for (funcion of funcionesInput(); track funcion.idFuncion) {
-                <div class="horario-badge">
-                    <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
-                    <span>{{ funcion.visual }} | {{ funcion.audio }}</span>
-                    <span>{{ funcion.sala }}</span>
-                    
-                    <button [routerLink]="['/comprar', funcion.idFuncion]">
-                        🎟️ Comprar
-                    </button>
-                </div>
-            } @empty {
-                <p>No hay funciones programadas para esta película.</p>
-            }
-        </div>
+            <div class="horarios-lista">
+                <h4>Horarios disponibles:</h4>
+                @for (funcion of funcionesInput(); track funcion.idFuncion) {
+                    <div class="horario-badge">
+                        <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
+                        <button [routerLink]="['/comprar', funcion.idFuncion]">🎟️ Comprar</button>
+                    </div>
+                } @empty {
+                    <p>No hay funciones programadas.</p>
+                }
+            </div>
+            
+        }
     </div>
 </div>

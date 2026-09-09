@@ -1,20 +1,20 @@
-import { Component, inject, OnInit } from '@angular/core'; // Agregamos OnInit
+import { Component, inject, OnInit, signal } from '@angular/core'; // Importar signal
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CineService } from '../../core/services/cine.service';
 import { IPelicula } from '../../core/interfaces/Pelicula';
+import { Pelicula } from '../../componentes/pelicula/pelicula'; // Ajustá la ruta si hace falta
 
 @Component({
     selector: 'app-abm-peliculas',
     standalone: true,
-    imports: [ReactiveFormsModule],
+    imports: [ReactiveFormsModule, Pelicula],
     templateUrl: './abm-peliculas.html',
     styleUrl: './abm-peliculas.css'
 })
 export class AbmPeliculasComponent implements OnInit {
     private fb = inject(FormBuilder);
     private cineService = inject(CineService);
-
-    listaPeliculas: IPelicula[] = [];
+    listaPeliculas = signal<IPelicula[]>([]);
 
     peliculaForm = this.fb.group({
         nombre: ['', Validators.required],
@@ -29,7 +29,8 @@ export class AbmPeliculasComponent implements OnInit {
 
     async cargarPeliculas() {
         try {
-            this.listaPeliculas = await this.cineService.obtenerPeliculas();
+            const pelis = await this.cineService.obtenerPeliculas();
+            this.listaPeliculas.set(pelis || []); 
         } catch (error) {
             console.error('Error al cargar la lista', error);
         }
@@ -51,8 +52,11 @@ export class AbmPeliculasComponent implements OnInit {
         }
     }
 
-    async borrarPelicula(id: number | undefined) {
+    async eliminarPeliculaDeBD(id: number | undefined) {
         if (!id) return;
+        
+        const confirmacion = confirm('Estas seguro de que queres borrar esta pelicula?');
+        if (!confirmacion) return;
 
         try {
             await this.cineService.eliminarPelicula(id);
@@ -60,6 +64,5 @@ export class AbmPeliculasComponent implements OnInit {
         } catch (error) {
             console.error('Error al borrar', error);
         }
-
     }
 }

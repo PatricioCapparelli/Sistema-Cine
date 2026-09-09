@@ -11,8 +11,7 @@ import { Pelicula } from '../pelicula/pelicula';
 })
 export class Cartelera implements OnInit {
   private supabaseS = inject(Supabase);
-  
-  // Convertimos las variables en Signals para que Angular siempre las escuche
+
   carteleraAgrupada = signal<any[]>([]); 
   cargando = signal(true);
 
