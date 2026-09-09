@@ -1,0 +1,25 @@
+<nav class="navbar-container">
+    <div class="logo">
+
+        <a routerLink="/cartelera">Sistema Cine</a>
+    </div>
+
+    <ul class="nav-links">
+        <li><a routerLink="/cartelera">Cartelera</a></li>
+
+        @if (authS.rolActual() === 'admin') {
+        <li><a routerLink="/admin/peliculas">Administrar Películas</a></li>
+        <li><a routerLink="/admin/funciones">Administrar Funciones</a></li>
+        }
+    </ul>
+
+    <div class="auth-actions">
+        @if (authS.usuarioActual()) {
+        <span class="user-badge">{{ authS.usuarioActual()?.email }}</span>
+        <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesion</button>
+        } @else {
+        <a routerLink="/auth/login" class="btn-login">Ingresar</a>
+        <a routerLink="/registro" class="btn-register">Registrarse</a>
+        }
+    </div>
+</nav>

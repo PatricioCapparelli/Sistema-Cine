@@ -1,0 +1,65 @@
+<div class="admin-container">
+    <h2>Administrar Horarios de Funciones</h2>
+    <p>Asigna horarios a las películas respetando los 30 minutos de limpieza de la sala.</p>
+
+    <form [formGroup]="formulario" (ngSubmit)="guardarFuncion()" class="formulario-admin">
+
+        <!-- Selección de Película -->
+        <div class="form-group">
+            <label for="pelicula_id">Película:</label>
+            <select id="pelicula_id" formControlName="pelicula_id">
+                <option value="" disabled selected>Seleccione una película...</option>
+
+                @for (peli of peliculas; track peli.id) {
+                <option [value]="peli.id">{{ peli.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <!-- Selección de Sala -->
+        <div class="form-group">
+            <label for="sala_id">Sala:</label>
+            <select id="sala_id" formControlName="sala_id">
+                <option value="" disabled selected>Seleccione la sala...</option>
+
+                @for (sala of salas; track sala.id) {
+                <option [value]="sala.id">{{ sala.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <!-- Fecha y Hora -->
+        <div class="form-group">
+            <label for="fecha_hora_inicio">Fecha y Hora de Inicio:</label>
+            <input type="datetime-local" id="fecha_hora_inicio" formControlName="fecha_hora_inicio">
+        </div>
+
+        <!-- Formato Visual -->
+        <div class="form-group">
+            <label for="formato_visual">Formato Visual:</label>
+            <select id="formato_visual" formControlName="formato_visual">
+                <option value="" disabled selected>Seleccione el formato visual...</option>
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+                <option value="4D">4D</option>
+                <option value="5D">5D</option>
+            </select>
+        </div>
+
+        <!-- Formato de Audio -->
+        <div class="form-group">
+            <label for="formato_audio">Idioma / Audio:</label>
+            <select id="formato_audio" formControlName="formato_audio">
+                <option value="" disabled selected>Seleccione el idioma...</option>
+                <option value="Castellano">Castellano</option>
+                <option value="Subtitulada">Subtitulada</option>
+            </select>
+        </div>
+
+        <!-- El botón se deshabilita automáticamente si faltan datos -->
+        <button type="submit" [disabled]="formulario.invalid" class="btn-guardar">
+            Guardar Función
+        </button>
+
+    </form>
+</div>

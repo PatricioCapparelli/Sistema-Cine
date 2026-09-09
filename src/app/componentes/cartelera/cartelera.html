@@ -1,7 +1,14 @@
-<div class="cartelera">
-    @for (p of peliculas; track $index) {
-    <app-pelicula [peliculaInput]="p"></app-pelicula>
-    } @empty {
-    <p>No hay peliculas en cartelera.</p>
+<div class="cartelera-container">
+    @if (cargando()) {
+    <p>Buscando funciones disponibles...</p>
+    } @else if (carteleraAgrupada().length === 0) {
+    <p>No hay funciones programadas para los próximos días.</p>
+    } @else {
+    <div class="grilla-peliculas">
+        @for (item of carteleraAgrupada(); track item.pelicula.id) {
+        <app-pelicula [peliculaInput]="item.pelicula" [funcionesInput]="item.horarios">
+        </app-pelicula>
+        }
+    </div>
     }
 </div>

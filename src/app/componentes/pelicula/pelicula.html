@@ -1,12 +1,27 @@
 <div class="card">
-    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" />
+    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" style="width: 150px;"/>
 
     <div class="card-body">
         <h3>{{ peliculaInput()?.nombre }}</h3>
-        <p><strong>Duracion:</strong> {{ peliculaInput()?.duracion_min }} min</p>
+        <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos }} min</p>
         <p>{{ peliculaInput()?.sinopsis }}</p>
 
-        <!-- Aquí luego podrías usar routerLink para ir a la compra -->
-        <button>Ver Funciones</button>
+        <div class="horarios-lista">
+            <h4>Horarios disponibles:</h4>
+            
+            @for (funcion of funcionesInput(); track funcion.idFuncion) {
+                <div class="horario-badge">
+                    <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
+                    <span>{{ funcion.visual }} | {{ funcion.audio }}</span>
+                    <span>{{ funcion.sala }}</span>
+                    
+                    <button [routerLink]="['/comprar', funcion.idFuncion]">
+                        🎟️ Comprar
+                    </button>
+                </div>
+            } @empty {
+                <p>No hay funciones programadas para esta película.</p>
+            }
+        </div>
     </div>
 </div>

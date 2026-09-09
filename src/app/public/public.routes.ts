@@ -10,7 +10,7 @@ export const publicRoutes: Routes = [
         loadComponent: () => import('../auth/register/register').then(m => m.Register)
     },
     {
-        path: 'login',
+        path: 'auth/login',
         loadComponent: () => import('../auth/login/login').then(m => m.Login)
     }
 ];

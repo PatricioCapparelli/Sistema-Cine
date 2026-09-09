@@ -19,7 +19,7 @@
 
         <div class="form-group">
             <label for="duracion_min">Duracion:</label>
-            <input type="number" id="duracion_min" formControlName="duracion_min">
+            <input type="number" id="duracion_minutos" formControlName="duracion_minutos">
         </div>
 
         <button type="submit" [disabled]="peliculaForm.invalid">
@@ -49,7 +49,7 @@
                         <img [src]="pelicula.imagen_url" alt="Poster">
                     </td>
                     <td>{{ pelicula.nombre }}</td>
-                    <td>{{ pelicula.duracion_min }} min</td>
+                    <td>{{ pelicula.duracion_minutos }} min</td>
                     <td>
                         <button (click)="borrarPelicula(pelicula.id)">Eliminar</button>
                     </td>

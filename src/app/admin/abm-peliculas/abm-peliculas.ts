@@ -20,7 +20,7 @@ export class AbmPeliculasComponent implements OnInit {
         nombre: ['', Validators.required],
         sinopsis: ['', Validators.required],
         imagen_url: ['', Validators.required],
-        duracion_min: [0, [Validators.required, Validators.min(1)]]
+        duracion_minutos: [0, [Validators.required, Validators.min(1)]]
     });
 
     ngOnInit() {

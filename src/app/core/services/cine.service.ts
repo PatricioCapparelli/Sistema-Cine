@@ -8,7 +8,7 @@ export class CineService {
 
     async crearPelicula(pelicula: IPelicula) {
         const { data, error } = await this.supabase.Supabase
-            .from('peliculas')
+            .from('Peliculas')
             .insert([pelicula])
             .select();
 
@@ -17,7 +17,7 @@ export class CineService {
     }
     async obtenerPeliculas() {
         const { data, error } = await this.supabase.Supabase
-            .from('peliculas')
+            .from('Peliculas')
             .select('*')
 
         if (error) throw error;
@@ -25,7 +25,7 @@ export class CineService {
     }
     async eliminarPelicula(id: number) {
         const { error } = await this.supabase.Supabase
-            .from('peliculas')
+            .from('Peliculas')
             .delete()
             .eq('id', id); 
 

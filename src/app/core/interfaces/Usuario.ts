@@ -1,4 +1,4 @@
-
+//registro
 export interface IAuthData {
     email: string;
     password: string;
@@ -9,8 +9,7 @@ export interface IAuthData {
     color_ojos: string;
     dias_vacaciones: number;
 }
-
-
+// BD
 export interface IUsuario {
     id?: string;
     nombre: string;
@@ -19,4 +18,6 @@ export interface IUsuario {
     tipo_sangre: string;
     color_ojos: string;
     dias_vacaciones: number;
+    cupon_usado?: boolean;
+    rol?: string;
 }

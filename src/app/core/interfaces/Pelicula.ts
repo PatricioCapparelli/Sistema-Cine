@@ -4,5 +4,5 @@ export interface IPelicula {
     nombre: string;
     sinopsis: string;
     imagen_url: string;
-    duracion_min: number;
+    duracion_minutos: number;
 }
