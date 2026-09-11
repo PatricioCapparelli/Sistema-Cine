@@ -1,29 +1,31 @@
 <div class="card">
-    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" style="width: 150px;"/>
+    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" style="width: 150px;" />
 
     <div class="card-body">
         <h3>{{ peliculaInput()?.nombre }}</h3>
-        <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos }} min</p>
+        <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos | formatoDuracion}}</p>
         <p>{{ peliculaInput()?.sinopsis }}</p>
 
         @if (modoAdmin()) {
-            <button (click)="onEliminar()">
-                Eliminar Pelicula
-            </button>
+        <button (click)="onEliminar()">
+            Eliminar Pelicula
+        </button>
         } @else {
-            
-            <div class="horarios-lista">
-                <h4>Horarios disponibles:</h4>
-                @for (funcion of funcionesInput(); track funcion.idFuncion) {
-                    <div class="horario-badge">
-                        <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
-                        <button [routerLink]="['/comprar', funcion.idFuncion]">🎟️ Comprar</button>
-                    </div>
-                } @empty {
-                    <p>No hay funciones programadas.</p>
-                }
+
+        <div class="horarios-lista">
+            <h4>Horarios disponibles:</h4>
+            @for (funcion of funcionesInput(); track funcion.idFuncion) {
+            <div class="horario-badge">
+                <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
+                <button [routerLink]="['/ingresar', funcion.idFuncion]">
+                    🎟️ Comprar
+                </button>
             </div>
-            
+            } @empty {
+            <p>No hay funciones programadas.</p>
+            }
+        </div>
+
         }
     </div>
 </div>

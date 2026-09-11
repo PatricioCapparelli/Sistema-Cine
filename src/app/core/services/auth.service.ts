@@ -21,7 +21,7 @@ export class Auth {
                     .from('Usuarios')
                     .select('rol')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
                 
                 if (!error && data) {
                     this.rolActual.set(data.rol);
@@ -53,7 +53,7 @@ export class Auth {
                 tipo_sangre: usuario.tipo_sangre,
                 color_ojos: usuario.color_ojos,
                 dias_vacaciones: usuario.dias_vacaciones,
-                cupon_usado: false, 
+                uso_cupon: false, 
                 rol: 'cliente'     
             };
 

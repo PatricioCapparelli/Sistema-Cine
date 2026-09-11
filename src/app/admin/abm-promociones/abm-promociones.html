@@ -1,0 +1,76 @@
+<div class="admin-container">
+    <h2>Gestión de Promociones y Cupones</h2>
+
+    <div class="panel-formulario">
+        <h3>{{ modoEdicion() ? 'Editar Promoción' : 'Nueva Promoción' }}</h3>
+        
+        <form [formGroup]="promoForm" (ngSubmit)="guardarFormulario()" class="formulario">
+            <div class="campo">
+                <label>Código de Promoción</label>
+                <select formControlName="codigo_interno">
+                    <option value="" disabled selected>Seleccione un codigo...</option>
+                    <option value="PRIMERA_COMPRA">Primera Compra</option>
+                    <option value="MAYOR_50">Mayores de 50 años</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label>Porcentaje de Descuento (%)</label>
+                <input type="number" formControlName="porcentaje_descuento" min="1" max="100">
+            </div>
+
+            <div class="campo checkbox-container">
+                <input type="checkbox" formControlName="activo" id="checkActivo">
+                <label for="checkActivo">Promoción Activa</label>
+            </div>
+
+            <div class="acciones-form">
+                <button type="submit" [disabled]="promoForm.invalid" class="btn-guardar">
+                    {{ modoEdicion() ? 'Actualizar' : 'Guardar' }}
+                </button>
+                
+                @if (modoEdicion()) {
+                    <button type="button" (click)="cancelarEdicion()" class="btn-cancelar">
+                        Cancelar
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="panel-tabla">
+        <table class="tabla-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Descuento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (promo of listaPromociones(); track promo.id) {
+                    <tr>
+                        <td>{{ promo.id }}</td>
+                        <td><strong>{{ promo.codigo_interno }}</strong></td>
+                        <td>{{ promo.porcentaje_descuento }}%</td>
+                        <td>
+                            <span class="badge" [class.activo]="promo.activo" [class.inactivo]="!promo.activo">
+                                {{ promo.activo ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                        </td>
+                        <td class="acciones-tabla">
+                            <button (click)="editarPromo(promo)" class="btn-editar">editar</button>
+                            <button (click)="eliminarPromo(promo.id)" class="btn-borrar">borrar</button>
+                        </td>
+                    </tr>
+                } @empty {
+                    <tr>
+                        <td colspan="5" class="sin-datos">No hay promociones cargadas.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

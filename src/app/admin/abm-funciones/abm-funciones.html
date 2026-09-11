@@ -1,14 +1,13 @@
 <div class="admin-container">
     <h2>Administrar Horarios de Funciones</h2>
-    <p>Asigna horarios a las películas respetando los 30 minutos de limpieza de la sala.</p>
+    <p>Asigna horarios a las peliculas respetando los 30 minutos de limpieza de la sala.</p>
 
     <form [formGroup]="formulario" (ngSubmit)="guardarFuncion()" class="formulario-admin">
 
-        <!-- Selección de Película -->
         <div class="form-group">
-            <label for="pelicula_id">Película:</label>
+            <label for="pelicula_id">Pelicula:</label>
             <select id="pelicula_id" formControlName="pelicula_id">
-                <option value="" disabled selected>Seleccione una película...</option>
+                <option value="" disabled selected>Seleccione una pelicula...</option>
 
                 @for (peli of peliculas; track peli.id) {
                 <option [value]="peli.id">{{ peli.nombre }}</option>

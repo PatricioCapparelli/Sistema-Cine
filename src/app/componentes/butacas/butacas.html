@@ -1,0 +1,46 @@
+<div class="contenedor-sala">
+    
+    <div class="pantalla">PANTALLA</div>
+
+    <div class="grilla">
+        @for (fila of matrizSala(); track $index) {
+            <div class="fila-butacas">
+                <div class="letra-fila">{{ fila[0].fila }}</div>
+                <div class="bloque">
+                    @for (butaca of fila.slice(0, 4); track butaca.id) {
+                        <button class="butaca" [class]="butaca.estado" (click)="seleccionarButaca(butaca)">
+                            {{ butaca.numero }}
+                        </button>
+                    }
+                </div>
+
+                <div class="pasillo"></div>
+
+                <div class="bloque">
+                    @for (butaca of fila.slice(4, 24); track butaca.id) {
+                        <button class="butaca" [class]="butaca.estado" (click)="seleccionarButaca(butaca)">
+                            {{ butaca.numero }}
+                        </button>
+                    }
+                </div>
+
+                <div class="pasillo"></div>
+
+                <div class="bloque">
+                    @for (butaca of fila.slice(24, 28); track butaca.id) {
+                        <button class="butaca" [class]="butaca.estado" (click)="seleccionarButaca(butaca)">
+                            {{ butaca.numero }}
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (butacasSeleccionadas().length > 0) {
+        <div class="resumen-compra">
+            <h3>Seleccionadas: {{ butacasSeleccionadas().length }}</h3>
+            <button class="btn-pagar">Ir a Pagar</button>
+        </div>
+    }
+</div>

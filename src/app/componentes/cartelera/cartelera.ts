@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core'; 
 import { Supabase } from '../../core/services/supabase.service'; 
 import { Pelicula } from '../pelicula/pelicula'; 
+import { CineService } from '../../core/services/cine.service';
 
 @Component({
   selector: 'app-cartelera',
@@ -10,7 +11,7 @@ import { Pelicula } from '../pelicula/pelicula';
   templateUrl: './cartelera.html',
 })
 export class Cartelera implements OnInit {
-  private supabaseS = inject(Supabase);
+  private cineService = inject(CineService)
 
   carteleraAgrupada = signal<any[]>([]); 
   cargando = signal(true);
@@ -22,21 +23,7 @@ export class Cartelera implements OnInit {
   async cargarCartelera() {
     try {
       const ahora = new Date().toISOString();
-
-      const { data: funciones, error } = await this.supabaseS.Supabase
-        .from('Funciones')
-        .select(`
-          id,
-          fecha_hora_inicio,
-          formato_visual,
-          formato_audio,
-          Peliculas (*),
-          Salas (nombre)
-        `)
-        .gte('fecha_hora_inicio', ahora)
-        .order('fecha_hora_inicio', { ascending: true });
-
-      if (error) throw error;
+      const funciones = await this.cineService.obtenerFunciones(ahora)
 
       const agrupado = this.agruparPorPelicula(funciones || []);
       this.carteleraAgrupada.set(agrupado);
@@ -61,7 +48,7 @@ export class Cartelera implements OnInit {
       mapa.get(idPeli).horarios.push({
         idFuncion: func.id,
         hora: func.fecha_hora_inicio,
-        sala: func.Salas.nombre,
+        sala: func.Salas?.nombre || 'Sala General',
         visual: func.formato_visual,
         audio: func.formato_audio
       });

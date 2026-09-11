@@ -18,6 +18,6 @@ export interface IUsuario {
     tipo_sangre: string;
     color_ojos: string;
     dias_vacaciones: number;
-    cupon_usado?: boolean;
+    uso_cupon?: boolean;
     rol?: string;
 }
