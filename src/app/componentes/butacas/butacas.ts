@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Supabase } from '../../core/services/supabase.service';
 
 export interface Butaca {
   id: string; 
@@ -16,12 +18,18 @@ export interface Butaca {
 })
 export class Butacas implements OnInit {
   private sesionCompra = inject(SesionCompraService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private supabaseS = inject(Supabase);
 
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
+  idFuncion = signal<string | null>(null);
 
   ngOnInit() {
+    this.idFuncion.set(this.route.snapshot.paramMap.get('id'));
     this.generarSala();
+    this.cargarButacasOcupadas();
   }
 
   private generarSala() {
@@ -46,6 +54,31 @@ export class Butacas implements OnInit {
     this.matrizSala.set(nuevaMatriz);
   }
 
+  private async cargarButacasOcupadas() {
+    if (!this.idFuncion()) return;
+
+    try {
+      const { data, error } = await this.supabaseS.Supabase
+        .from('Ventas') 
+        .select('butaca_id')
+        .eq('funcion_id', this.idFuncion());
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const ocupadas = data.map(t => t.butaca_id);
+        
+        this.matrizSala.update(matriz => {
+          return matriz.map(fila => 
+            fila.map(b => ocupadas.includes(b.id) ? { ...b, estado: 'ocupada' } : b)
+          );
+        });
+      }
+    } catch (error) {
+      console.error('Error al cargar butacas ocupadas:', error);
+    }
+  }
+
   seleccionarButaca(butaca: Butaca) {
     if (butaca.estado === 'ocupada') return; 
 
@@ -60,7 +93,6 @@ export class Butacas implements OnInit {
     }
   }
 
-
   calcularTotal(): number {
     const cantidad = this.butacasSeleccionadas().length;
     const precioTotal = cantidad * this.sesionCompra.precioBaseEntrada;
@@ -71,5 +103,52 @@ export class Butacas implements OnInit {
   
   obtenerDescuento(): number {
     return this.sesionCompra.descuentoAplicado();
+  }
+
+  async confirmarCompra() {
+    if (this.butacasSeleccionadas().length === 0) {
+      alert('Debes seleccionar al menos una butaca.');
+      return;
+    }
+
+    try {
+      const datosUsuario = this.sesionCompra.datosUsuario();
+      const esAnonimo = this.sesionCompra.esAnonimo();
+      
+      const totalPagado = this.calcularTotal();
+      const cantidadButacas = this.butacasSeleccionadas().length;
+      
+      const precioPorButaca = totalPagado / cantidadButacas; 
+
+      const ticketsAInsertar = this.butacasSeleccionadas().map(butaca => ({
+        funcion_id: this.idFuncion(),
+        usuario_id: !esAnonimo && datosUsuario ? datosUsuario.id : null, 
+        email_comprador: this.sesionCompra.emailComprador(),
+        monto_total: precioPorButaca, 
+        butaca_id: butaca.id 
+      }));
+
+      const { error: errorVenta } = await this.supabaseS.Supabase
+        .from('Ventas') 
+        .insert(ticketsAInsertar);
+
+      if (errorVenta) throw errorVenta;
+
+      if (!esAnonimo && datosUsuario && datosUsuario.uso_cupon === false) {
+        const { error: errorUsuario } = await this.supabaseS.Supabase
+          .from('Usuarios')
+          .update({ uso_cupon: true })
+          .eq('id', datosUsuario.id);
+          
+        if (errorUsuario) console.error('Error al actualizar el cupón', errorUsuario);
+      }
+
+      alert(`¡Compra exitosa! Total pagado: $${totalPagado}`);
+      this.router.navigate(['/cartelera']);
+
+    } catch (error) {
+      console.error('Error procesando la compra:', error);
+      alert('Hubo un error al procesar tu compra. Revisá la consola.');
+    }
   }
 }

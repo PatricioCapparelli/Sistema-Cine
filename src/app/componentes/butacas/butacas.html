@@ -40,7 +40,7 @@
     @if (butacasSeleccionadas().length > 0) {
         <div class="resumen-compra">
             <h3>Seleccionadas: {{ butacasSeleccionadas().length }}</h3>
-            <button class="btn-pagar">Ir a Pagar</button>
+            <button class="btn-pagar" (click)="confirmarCompra()">Ir a Pagar</button>
         </div>
     }
 </div>
