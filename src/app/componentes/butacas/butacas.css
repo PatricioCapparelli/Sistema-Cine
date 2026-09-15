@@ -1,120 +1,116 @@
+/* --- CONTENEDOR PRINCIPAL --- */
 .contenedor-sala {
-    max-width: 1200px;
-    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
-    background-color: #1a1a1a;
-    color: white;
-    border-radius: 8px;
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 .pantalla {
     width: 80%;
-    margin: 0 auto 40px auto;
-    padding: 10px;
+    background-color: #444;
+    color: white;
     text-align: center;
-    background: linear-gradient(to bottom, #444, #222);
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-    border-top: 4px solid #007bff;
-    font-weight: bold;
+    padding: 10px;
+    margin-bottom: 40px;
+    border-radius: 4px;
     letter-spacing: 5px;
-    box-shadow: 0 15px 25px rgba(0, 123, 255, 0.2);
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .grilla {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px; 
 }
 
 .fila-butacas {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
 }
 
 .letra-fila {
     width: 30px;
     font-weight: bold;
-    color: #888;
-    text-align: right;
-    margin-right: 15px;
+    font-size: 1.2rem;
+    color: #333;
 }
 
 .bloque {
     display: flex;
-    gap: 4px;
+    gap: 5px; 
 }
 
 .pasillo {
-    width: 40px; /* Ancho del pasillo */
+    width: 40px;
 }
 
-/* DISEÑO DE LA BUTACA */
+
 .butaca {
-    width: 28px;
-    height: 28px;
-    border-radius: 5px 5px 2px 2px;
-    border: none;
-    font-size: 0.6rem;
+    width: 35px;
+    height: 35px;
+    border-radius: 8px 8px 4px 4px; 
+    border: 1px solid #ccc;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease-in-out;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
 }
 
 .butaca.libre {
-    background-color: #444;
-    color: #fff;
+    background-color: #ffffff;
+    color: #333;
 }
 .butaca.libre:hover {
-    background-color: #666;
+    background-color: #e0e0e0; 
 }
 
 .butaca.seleccionada {
-    background-color: #28a745;
+    background-color: #a79428;
     color: white;
-    box-shadow: 0 0 8px #28a745;
+    border-color: #000000;
+    transform: scale(1.0); 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .butaca.ocupada {
-    background-color: #dc3545;
-    color: transparent;
+    background-color: #6c757d;
+    color: #d3d3d3;
+    border-color: #545b62;
     cursor: not-allowed;
-    position: relative;
-}
-/* Crucecita para las ocupadas */
-.butaca.ocupada::after {
-    content: "X";
-    color: rgba(255, 255, 255, 0.5);
-    position: absolute;
-    font-size: 1rem;
+    opacity: 0.6;
 }
 
 .resumen-compra {
-    position: fixed;
-    bottom: 0;
-    left: 0;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    padding: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    border-top: 2px solid #007bff;
+    max-width: 400px;
 }
 
 .btn-pagar {
-    padding: 10px 25px;
-    background-color: #007bff;
+    background-color: #2200ff;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-weight: bold;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 5px;
     cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-pagar:hover {
+    background-color: #0056b3;
 }

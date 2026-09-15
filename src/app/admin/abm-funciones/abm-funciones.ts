@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Supabase } from '../../core/services/supabase.service';
 import { IFuncion } from '../../core/interfaces/Funcion';
+import { CineService } from '../../core/services/cine.service';
 
 @Component({
   selector: 'app-abm-funciones',
@@ -13,6 +14,7 @@ import { IFuncion } from '../../core/interfaces/Funcion';
 export class AbmFuncionesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseS = inject(Supabase);
+  private cineService = inject(CineService)
 
   peliculas: any[] = [];
   salas: any[] = [];
@@ -47,72 +49,40 @@ export class AbmFuncionesComponent implements OnInit {
     }
 
     const formData = this.formulario.value;
-    const inicioNueva = new Date(formData.fecha_hora_inicio!);
+
+    const nuevaFuncion: IFuncion = {
+      pelicula_id: Number(formData.pelicula_id),
+      sala_id: Number(formData.sala_id),
+      fecha_hora_inicio: formData.fecha_hora_inicio!,
+      formato_visual: formData.formato_visual!,
+      formato_audio: formData.formato_audio!
+    };
 
     try {
-      const { data: peliData, error: errPeli } = await this.supabaseS.Supabase
-        .from('Peliculas')
-        .select('duracion_minutos')
-        .eq('id', formData.pelicula_id)
-        .single();
-
-      if (errPeli) throw errPeli;
-
-      // Calculamos cuánto tiempo va a ocupar esta sala (Duración + 30 min extra)
-      const duracionNuevaPeli = peliData.duracion_minutos;
-      // Multiplicamos por 60000 para pasar los minutos a milisegundos
-      const finNueva = new Date(inicioNueva.getTime() + (duracionNuevaPeli + 30) * 60000);
-
-      //Traer todas las funciones que ya existen en ESA SALA
-      // Magia de Supabase: Hacemos un "Join" para traer también la duración de esas películas
-      const { data: funcionesExistentes, error: errFunciones } = await this.supabaseS.Supabase
-        .from('Funciones')
-        .select('fecha_hora_inicio, Peliculas(duracion_minutos)')
-        .eq('sala_id', formData.sala_id);
-
-      if (errFunciones) throw errFunciones;
-
+      await this.cineService.guardarFuncion(nuevaFuncion);
       
-      let hayConflicto = false; // colision de horarios
-
-      if (funcionesExistentes) {
-        for (const func of funcionesExistentes) {
-          const inicioExistente = new Date(func.fecha_hora_inicio);
-          const duracionExistente = (func.Peliculas as any).duracion_minutos;
-          const finExistente = new Date(inicioExistente.getTime() + (duracionExistente + 30) * 60000);
-
-          if (inicioNueva < finExistente && inicioExistente < finNueva) {
-            hayConflicto = true;
-            break; 
-          }
-        }
-      }
-
-      if (hayConflicto) {
-        alert('Error: El horario choca con otra funcion en esta sala o no respeta los 30 minutos de limpieza.');
-        return; 
-      }
-
-      const nuevaFuncion: IFuncion = {
-        pelicula_id: Number(formData.pelicula_id),
-        sala_id: Number(formData.sala_id),
-        fecha_hora_inicio: formData.fecha_hora_inicio!,
-        formato_visual: formData.formato_visual!,
-        formato_audio: formData.formato_audio!
-      };
-
-      const { error: errInsert } = await this.supabaseS.Supabase
-        .from('Funciones')
-        .insert([nuevaFuncion]);
-
-      if (errInsert) throw errInsert;
-
-      alert('Funcion agregada con exito a la cartelera!');
+      alert('¡Funcion agregada con exito a la cartelera!');
       this.formulario.reset();
+      
+    } catch (error: any) {
+      if (error.message === 'CONFLICTO_HORARIO') {
+        alert('Error: El horario choca con otra funcion en esta sala o no respeta los 30 minutos de limpieza.');
+      } else {
+        console.error('Error al procesar la funcion:', error);
+        alert('Hubo un error de conexión al intentar guardar.');
+      }
+    }
+  }
 
-    } catch (error) {
-      console.error('Error al procesar la funcion:', error);
-      alert('Hubo un error de conexión al intentar guardar.');
+  async borrarFuncion(idFuncion: number) {
+    if(confirm('¿Estas seguro de que queres eliminar esta funcion?')) {
+      try {
+        await this.cineService.eliminarFuncion(idFuncion);
+        alert('Función eliminada con exito.');
+      } catch (error) {
+        console.error(error);
+        alert('Hubo un error al eliminar la funcion.');
+      }
     }
   }
 }
