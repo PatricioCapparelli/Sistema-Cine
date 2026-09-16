@@ -29,12 +29,31 @@
 
         <div class="form-group">
             <label for="tipo_sangre">Tipo de Sangre:</label>
-            <input type="text" id="tipo_sangre" formControlName="tipo_sangre">
+            <select id="tipo_sangre" formControlName="tipo_sangre">
+                <option value="" disabled selected>Seleccioná un tipo</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+            </select>
         </div>
 
         <div class="form-group">
             <label for="color_ojos">Color de Ojos:</label>
-            <input type="text" id="color_ojos" formControlName="color_ojos">
+            <select id="color_ojos" formControlName="color_ojos">
+                <option value="" disabled selected>Seleccioná un color</option>
+                <option value="Marrón">Marrón</option>
+                <option value="Azul">Azul</option>
+                <option value="Verde">Verde</option>
+                <option value="Miel/Avellana">Miel/Avellana</option>
+                <option value="Gris">Gris</option>
+                <option value="Negro">Negro</option>
+                <option value="Otro">Otro</option>
+            </select>
         </div>
 
         <div class="form-group">

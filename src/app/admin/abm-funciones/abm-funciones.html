@@ -7,7 +7,7 @@
         <div class="form-group">
             <label for="pelicula_id">Pelicula:</label>
             <select id="pelicula_id" formControlName="pelicula_id">
-                <option value="" disabled selected>Seleccione una pelicula...</option>
+                <option value="" disabled selected>Seleccione una pelicula</option>
 
                 @for (peli of peliculas; track peli.id) {
                 <option [value]="peli.id">{{ peli.nombre }}</option>
@@ -15,7 +15,6 @@
             </select>
         </div>
 
-        <!-- Selección de Sala -->
         <div class="form-group">
             <label for="sala_id">Sala:</label>
             <select id="sala_id" formControlName="sala_id">
@@ -27,13 +26,11 @@
             </select>
         </div>
 
-        <!-- Fecha y Hora -->
         <div class="form-group">
             <label for="fecha_hora_inicio">Fecha y Hora de Inicio:</label>
             <input type="datetime-local" id="fecha_hora_inicio" formControlName="fecha_hora_inicio">
         </div>
 
-        <!-- Formato Visual -->
         <div class="form-group">
             <label for="formato_visual">Formato Visual:</label>
             <select id="formato_visual" formControlName="formato_visual">
@@ -45,7 +42,6 @@
             </select>
         </div>
 
-        <!-- Formato de Audio -->
         <div class="form-group">
             <label for="formato_audio">Idioma / Audio:</label>
             <select id="formato_audio" formControlName="formato_audio">
@@ -55,7 +51,6 @@
             </select>
         </div>
 
-        <!-- El botón se deshabilita automáticamente si faltan datos -->
         <button type="submit" [disabled]="formulario.invalid" class="btn-guardar">
             Guardar Función
         </button>

@@ -44,7 +44,6 @@ export class Ingresar implements OnInit {
     this.idFuncion.set(this.route.snapshot.paramMap.get('id'));
   }
 
-
   private async cargarDatosYContinuar(userId: string) {
     try {
       const { data: usuarioDB, error } = await this.supabaseS.Supabase
