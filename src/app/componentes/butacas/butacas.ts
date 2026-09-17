@@ -1,15 +1,10 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
-import { Supabase } from '../../core/services/supabase.service';
+import { CineService } from '../../core/services/cine.service'; 
+import { Ticket } from '../../core/services/ticket.service';
 import { Venta } from '../../core/interfaces/Venta';
-
-export interface Butaca {
-  id: string;
-  fila: string;
-  numero: number;
-  estado: 'libre' | 'seleccionada' | 'ocupada';
-}
+import { Butaca } from '../../core/interfaces/Butaca';
 
 @Component({
   selector: 'app-butacas',
@@ -21,25 +16,28 @@ export class Butacas implements OnInit {
   private sesionCompra = inject(SesionCompraService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private supabaseS = inject(Supabase);
-
+  private cineService = inject(CineService); 
+  private ticketService = inject(Ticket);
+  
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
   idFuncion = signal<string | null>(null);
-
-  cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
   
+  detalleFuncion = signal<{ pelicula: string, horario: string } | null>(null);
+  cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
+
   totalAPagar = computed(() => {
     const cantidad = this.cantidadSeleccionadas();
     const precioBruto = cantidad * this.sesionCompra.precioBaseEntrada;
     const descuento = this.sesionCompra.descuentoAplicado();
-    
+
     return precioBruto - (precioBruto * (descuento / 100));
   });
 
   ngOnInit() {
     this.idFuncion.set(this.route.snapshot.paramMap.get('id'));
     this.generarSala();
+    this.cargarDetalleFuncion();
     this.cargarButacasOcupadas();
   }
 
@@ -55,10 +53,27 @@ export class Butacas implements OnInit {
         numero: j + 1,
         estado: 'libre'
       }));
-      
+
       nuevaMatriz.push(butacasFila);
     }
     this.matrizSala.set(nuevaMatriz);
+  }
+
+  private async cargarDetalleFuncion() {
+    const id = this.idFuncion();
+    if (!id) return;
+
+    try {
+      const data = await this.cineService.obtenerDetalleFuncion(id);
+      if (data) {
+        this.detalleFuncion.set({
+          pelicula: (data.Peliculas as any).nombre,
+          horario: new Date(data.fecha_hora_inicio).toLocaleString()
+        });
+      }
+    } catch (error) {
+      console.error('Error al cargar detalles para el ticket:', error);
+    }
   }
 
   private async cargarButacasOcupadas() {
@@ -66,17 +81,12 @@ export class Butacas implements OnInit {
     if (!id) return;
 
     try {
-      const { data, error } = await this.supabaseS.Supabase
-        .from('Ventas')
-        .select('butaca_id')
-        .eq('funcion_id', id);
-
-      if (error) throw error;
-
-      if (data?.length) {
+      const data = await this.cineService.obtenerButacasOcupadas(id);
+      
+      if (data.length) {
         const ocupadas = new Set(data.map(t => t.butaca_id));
 
-        this.matrizSala.update(matriz => 
+        this.matrizSala.update(matriz =>
           matriz.map(fila =>
             fila.map(b => ocupadas.has(b.id) ? { ...b, estado: 'ocupada' } : b)
           )
@@ -122,7 +132,6 @@ export class Butacas implements OnInit {
       const datosUsuario = this.sesionCompra.datosUsuario();
       const esAnonimo = this.sesionCompra.esAnonimo();
       const total = this.totalAPagar();
-      
       const precioPorButaca = total / cantidad;
 
       const ticketsAInsertar: Venta[] = this.butacasSeleccionadas().map(butaca => ({
@@ -133,22 +142,27 @@ export class Butacas implements OnInit {
         butaca_id: butaca.id
       }));
 
-      const { error: errorVenta } = await this.supabaseS.Supabase
-        .from('Ventas')
-        .insert(ticketsAInsertar);
-
-      if (errorVenta) throw errorVenta;
+      await this.cineService.registrarVentas(ticketsAInsertar);
 
       if (!esAnonimo && datosUsuario?.uso_cupon === false) {
-        const { error: errorUsuario } = await this.supabaseS.Supabase
-          .from('Usuarios')
-          .update({ uso_cupon: true })
-          .eq('id', datosUsuario.id);
-
-        if (errorUsuario) console.error('Error al actualizar el cupón', errorUsuario);
+        try {
+          await this.cineService.marcarCuponUsado(datosUsuario.id);
+        } catch (errorUsuario) {
+          console.error('Error al actualizar el cupon', errorUsuario);
+        }
       }
 
-      alert(`¡Compra exitosa! Total pagado: $${total}`);
+      const butacasCompradas = this.butacasSeleccionadas().map(b => b.id);
+      const detalles = this.detalleFuncion();
+      
+      await this.ticketService.generarTicketsPDF(
+        detalles?.pelicula || 'Película UTN', 
+        detalles?.horario || new Date().toLocaleString(),
+        butacasCompradas,
+        total
+      );
+
+      alert(`¡Compra exitosa! Revisa tus descargas para ver el ticket.`);
       this.router.navigate(['/cartelera']);
 
     } catch (error) {

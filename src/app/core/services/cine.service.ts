@@ -2,6 +2,7 @@ import { Service, inject } from '@angular/core';
 import { Supabase } from './supabase.service';
 import { IPelicula } from '../interfaces/Pelicula';
 import { IFuncion } from '../interfaces/Funcion';
+import { Venta } from '../interfaces/Venta';
 
 @Service()
 export class CineService {
@@ -99,5 +100,43 @@ export class CineService {
             .eq('id', idFuncion);
 
         if (error) throw new Error('No se pudo eliminar la función');
+    }
+
+    async obtenerDetalleFuncion(id: string) {
+        const { data, error } = await this.s
+            .from('Funciones')
+            .select('fecha_hora_inicio, Peliculas(nombre)')
+            .eq('id', id)
+            .single();
+
+        if (error) throw new Error('Error al obtener el detalle de la función');
+        return data;
+    }
+
+    async obtenerButacasOcupadas(funcionId: string) {
+        const { data, error } = await this.s
+            .from('Ventas')
+            .select('butaca_id')
+            .eq('funcion_id', funcionId);
+
+        if (error) throw new Error('Error al obtener las butacas ocupadas');
+        return data || [];
+    }
+
+    async registrarVentas(ventas: Venta[]) {
+        const { error } = await this.s
+            .from('Ventas')
+            .insert(ventas);
+
+        if (error) throw new Error('Error al registrar la venta');
+    }
+
+    async marcarCuponUsado(usuarioId: string) {
+        const { error } = await this.s
+            .from('Usuarios')
+            .update({ uso_cupon: true })
+            .eq('id', usuarioId);
+
+        if (error) throw new Error('Error al actualizar el cupón del usuario');
     }
 }
