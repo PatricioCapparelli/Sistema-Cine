@@ -1,6 +1,6 @@
 <div class="admin-container">
     <h2>Cargar Nueva Pelicula</h2>
-    
+
     <form [formGroup]="peliculaForm" (ngSubmit)="guardarPelicula()">
         <div class="form-group">
             <label for="nombre">Nombre de la Pelicula:</label>
@@ -22,6 +22,11 @@
             <input type="number" id="duracion_minutos" formControlName="duracion_minutos">
         </div>
 
+        <div class="form-group">
+            <label>Género</label>
+            <input type="text" formControlName="genero" placeholder="Ej: Acción, Drama...">
+        </div>
+
         <button type="submit" [disabled]="peliculaForm.invalid">
             Guardar en Base de Datos
         </button>
@@ -34,15 +39,12 @@
     <h2>Películas en Base de Datos</h2>
 
     <div class="peliculas">
-        
+
         @for (pelicula of listaPeliculas(); track pelicula.id) {
-            <app-pelicula 
-                [peliculaInput]="pelicula"
-                [modoAdmin]="true" 
-                (eliminarOutput)="eliminarPeliculaDeBD($event)">
-            </app-pelicula>
+        <app-pelicula [peliculaInput]="pelicula" [modoAdmin]="true" (eliminarOutput)="eliminarPeliculaDeBD($event)">
+        </app-pelicula>
         } @empty {
-            <p>No hay peliculas cargadas todavia.</p>
+        <p>No hay peliculas cargadas todavia.</p>
         }
 
     </div>

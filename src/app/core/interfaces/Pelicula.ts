@@ -5,4 +5,5 @@ export interface IPelicula {
     sinopsis: string;
     imagen_url: string;
     duracion_minutos: number;
+    genero: string;
 }

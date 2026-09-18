@@ -1,14 +1,58 @@
 <div class="cartelera-container">
-    @if (cargando()) {
-    <p>Buscando funciones disponibles...</p>
-    } @else if (carteleraAgrupada().length === 0) {
-    <p>No hay funciones programadas para los próximos días.</p>
-    } @else {
-    <div class="grilla-peliculas">
-        @for (item of carteleraAgrupada(); track item.pelicula.id) {
-        <app-pelicula [peliculaInput]="item.pelicula" [funcionesInput]="item.horarios">
-        </app-pelicula>
-        }
-    </div>
+    
+    @if (top3().length > 0) {
+        <section class="top3-section">
+            <div class="header-top3">
+                <h2 class="titulo-seccion-top">Top 3: Las Mas Elegidas</h2>
+                <button class="btn-toggle-top" (click)="toggleTop3()">
+                    {{ mostrarTop3() ? 'Ocultar' : 'Ver' }}
+                </button>
+            </div>
+
+            @if (mostrarTop3()) {
+                <div class="grid-top3">
+                    @for (peli of top3(); track peli.id; let i = $index) {
+                        <div class="card-top">
+                            <div class="medalla">{{ i + 1 }}</div>
+                            <img [src]="peli.imagen_url" [alt]="peli.nombre">
+                            <div class="info-top">
+                                <h3>{{ peli.nombre }}</h3>
+                                <p class="tickets-vendidos">🎟️ {{ peli.totalTickets }} entradas vendidas</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
     }
+
+    <section class="buscador-section">
+        <h2 class="titulo-seccion">Cartelera de Funciones</h2>
+        <div class="barra-busqueda">
+            <input 
+                type="text" 
+                placeholder="Buscar por género... (Ej: Acción, Terror)" 
+                [(ngModel)]="terminoBusqueda" 
+                (keyup.enter)="buscar()">
+            <button class="btn-buscar" (click)="buscar()">Buscar</button>
+        </div>
+    </section>
+
+    <section class="catalogo-section">
+        @if (cargando()) {
+            <p class="mensaje-estado">Buscando funciones disponibles...</p>
+        } @else if (carteleraAgrupada().length === 0) {
+            <p class="mensaje-estado">No hay funciones programadas o no coinciden con tu búsqueda.</p>
+        } @else {
+            <div class="grilla-peliculas">
+                @for (item of carteleraAgrupada(); track item.pelicula.id) {
+                    <app-pelicula 
+                        [peliculaInput]="item.pelicula" 
+                        [funcionesInput]="item.horarios">
+                    </app-pelicula>
+                }
+            </div>
+        }
+    </section>
+
 </div>

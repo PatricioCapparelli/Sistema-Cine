@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Supabase } from '../../core/services/supabase.service';
 import { IFuncion } from '../../core/interfaces/Funcion';
-import { CineService } from '../../core/services/cine.service';
+import { FuncionesService } from '../../core/services/funciones.service';
 
 @Component({
   selector: 'app-abm-funciones',
@@ -14,7 +14,8 @@ import { CineService } from '../../core/services/cine.service';
 export class AbmFuncionesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private supabaseS = inject(Supabase);
-  private cineService = inject(CineService)
+  private s = this.supabaseS.Supabase
+  private funcionesService = inject(FuncionesService)
 
   peliculas: any[] = [];
   salas: any[] = [];
@@ -33,12 +34,12 @@ export class AbmFuncionesComponent implements OnInit {
   }
 
   async cargarPeliculas() {
-    const { data } = await this.supabaseS.Supabase.from('Peliculas').select('id, nombre');
+    const { data } = await this.s.from('Peliculas').select('id, nombre');
     this.peliculas = data || [];
   }
 
   async cargarSalas() {
-    const { data } = await this.supabaseS.Supabase.from('Salas').select('id, nombre');
+    const { data } = await this.s.from('Salas').select('id, nombre');
     this.salas = data || [];
   }
 
@@ -59,7 +60,7 @@ export class AbmFuncionesComponent implements OnInit {
     };
 
     try {
-      await this.cineService.guardarFuncion(nuevaFuncion);
+      await this.funcionesService.guardarFuncion(nuevaFuncion);
       
       alert('¡Funcion agregada con exito a la cartelera!');
       this.formulario.reset();
@@ -77,7 +78,7 @@ export class AbmFuncionesComponent implements OnInit {
   async borrarFuncion(idFuncion: number) {
     if(confirm('¿Estas seguro de que queres eliminar esta funcion?')) {
       try {
-        await this.cineService.eliminarFuncion(idFuncion);
+        await this.funcionesService.eliminarFuncion(idFuncion);
         alert('Función eliminada con exito.');
       } catch (error) {
         console.error(error);

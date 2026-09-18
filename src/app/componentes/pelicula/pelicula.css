@@ -5,3 +5,44 @@
     padding: 5px;
     align-items: center;
 }
+/* --- CAJAS DESPLEGABLES (ACORDEONES) --- */
+.caja-desplegable {
+    margin-top: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #fafafa;
+}
+
+.caja-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f1f3f5;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.caja-header:hover {
+    background-color: #e2e6ea;
+}
+
+.caja-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.icono {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.caja-body {
+    padding: 15px;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+}

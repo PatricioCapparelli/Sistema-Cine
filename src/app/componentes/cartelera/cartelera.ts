@@ -1,38 +1,76 @@
 import { Component, inject, OnInit, signal } from '@angular/core'; 
-import { Supabase } from '../../core/services/supabase.service'; 
+import { FormsModule } from '@angular/forms'; 
 import { Pelicula } from '../pelicula/pelicula'; 
-import { CineService } from '../../core/services/cine.service';
+import { FuncionesService } from '../../core/services/funciones.service';
+import { PeliculasService } from '../../core/services/peliculas.service'; 
 
 @Component({
   selector: 'app-cartelera',
   standalone: true,
-  imports: [Pelicula],
+  imports: [Pelicula, FormsModule], 
   styleUrl: './cartelera.css',
   templateUrl: './cartelera.html',
 })
 export class Cartelera implements OnInit {
-  private cineService = inject(CineService)
+  private funcionesService = inject(FuncionesService);
+  private peliculasService = inject(PeliculasService);
 
   carteleraAgrupada = signal<any[]>([]); 
   cargando = signal(true);
+  mostrarTop3 = signal<boolean>(false);
+  carteleraAgrupadaOriginal = signal<any[]>([]); 
+  top3 = signal<any[]>([]);
+  terminoBusqueda = signal<string>('');
 
   async ngOnInit() {
+    await this.cargarTop3(); 
     await this.cargarCartelera();
+  }
+
+  async cargarTop3() {
+    try {
+      const data = await this.peliculasService.obtenerTop3Peliculas();
+      this.top3.set(data);
+    } catch (error) {
+      console.error('Error cargando top 3:', error);
+    }
+  }
+
+  toggleTop3() {
+    this.mostrarTop3.update(valor => !valor);
   }
 
   async cargarCartelera() {
     try {
       const ahora = new Date().toISOString();
-      const funciones = await this.cineService.obtenerFunciones(ahora)
+      const funciones = await this.funcionesService.obtenerFunciones(ahora);
 
       const agrupado = this.agruparPorPelicula(funciones || []);
+      
       this.carteleraAgrupada.set(agrupado);
+      this.carteleraAgrupadaOriginal.set(agrupado);
       
     } catch (error) {
       console.error('Error cargando la cartelera:', error);
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  buscar() {
+    const termino = this.terminoBusqueda().trim().toLowerCase();
+    
+    if (!termino) {
+      this.carteleraAgrupada.set(this.carteleraAgrupadaOriginal());
+      return;
+    }
+
+    const filtrados = this.carteleraAgrupadaOriginal().filter(item => {
+      const genero = item.pelicula.genero ? item.pelicula.genero.toLowerCase() : '';
+      return genero.includes(termino);
+    });
+    
+    this.carteleraAgrupada.set(filtrados);
   }
 
   private agruparPorPelicula(funcionesAbiertas: any[]) {

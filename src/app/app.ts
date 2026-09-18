@@ -9,5 +9,4 @@ import { NavbarComponent } from './componentes/navbar/navbar';
   styleUrl: './app.css'
 })
 export class App {
-//
 }

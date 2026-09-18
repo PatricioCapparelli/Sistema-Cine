@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
-import { CineService } from '../../core/services/cine.service'; 
+import { FuncionesService } from '../../core/services/funciones.service';
 import { Ticket } from '../../core/services/ticket.service';
 import { Venta } from '../../core/interfaces/Venta';
 import { Butaca } from '../../core/interfaces/Butaca';
@@ -16,8 +16,9 @@ export class Butacas implements OnInit {
   private sesionCompra = inject(SesionCompraService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private cineService = inject(CineService); 
+  private funcionesService = inject(FuncionesService); 
   private ticketService = inject(Ticket);
+  private compraVenta = inject(SesionCompraService)
   
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
@@ -64,7 +65,7 @@ export class Butacas implements OnInit {
     if (!id) return;
 
     try {
-      const data = await this.cineService.obtenerDetalleFuncion(id);
+      const data = await this.funcionesService.obtenerDetalleFuncion(id);
       if (data) {
         this.detalleFuncion.set({
           pelicula: (data.Peliculas as any).nombre,
@@ -81,7 +82,7 @@ export class Butacas implements OnInit {
     if (!id) return;
 
     try {
-      const data = await this.cineService.obtenerButacasOcupadas(id);
+      const data = await this.funcionesService.obtenerButacasOcupadas(id);
       
       if (data.length) {
         const ocupadas = new Set(data.map(t => t.butaca_id));
@@ -142,11 +143,11 @@ export class Butacas implements OnInit {
         butaca_id: butaca.id
       }));
 
-      await this.cineService.registrarVentas(ticketsAInsertar);
+      await this.funcionesService.registrarVentas(ticketsAInsertar);
 
       if (!esAnonimo && datosUsuario?.uso_cupon === false) {
         try {
-          await this.cineService.marcarCuponUsado(datosUsuario.id);
+          await this.compraVenta.marcarCuponUsado(datosUsuario.id);
         } catch (errorUsuario) {
           console.error('Error al actualizar el cupon', errorUsuario);
         }
