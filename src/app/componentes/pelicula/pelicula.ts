@@ -23,12 +23,11 @@ export class Pelicula implements OnInit {
   private resenasService = inject(ResenasService);
   public authService = inject(Auth); 
 
+  modalAbierto = signal<boolean>(false);
   listaResenas = signal<any[]>([]);
   promedioEstrellas = signal<string>('0.0');
   nuevaCalificacion = signal<number>(5);
   nuevoComentario = signal<string>('');
-  mostrarHorarios = signal<boolean>(false); 
-  mostrarResenas = signal<boolean>(false);
 
   async ngOnInit() {
     await this.cargarResenas();
@@ -83,12 +82,12 @@ export class Pelicula implements OnInit {
     }
   }
 
-  toggleHorarios() {
-    this.mostrarHorarios.update(valor => !valor);
+  abrirModal() {
+    this.modalAbierto.set(true);
   }
 
-  toggleResenas() {
-    this.mostrarResenas.update(valor => !valor);
+  cerrarModal() {
+    this.modalAbierto.set(false);
   }
 
   onEliminar() {

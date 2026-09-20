@@ -1,20 +1,27 @@
 import { Component, inject, OnInit, signal } from '@angular/core'; 
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { PeliculasService } from '../../core/services/peliculas.service';
+import { TmdbService } from '../../core/services/tmdb.service';
 import { IPelicula } from '../../core/interfaces/Pelicula';
+import { Tmdb } from '../../core/interfaces/Tmdb';
 import { Pelicula } from '../../componentes/pelicula/pelicula'; 
+import { SlicePipe } from '@angular/common';
 
 @Component({
     selector: 'app-abm-peliculas',
     standalone: true,
-    imports: [ReactiveFormsModule, Pelicula],
+    imports: [ReactiveFormsModule, FormsModule, Pelicula, SlicePipe], 
     templateUrl: './abm-peliculas.html',
     styleUrl: './abm-peliculas.css'
 })
 export class AbmPeliculasComponent implements OnInit {
     private fb = inject(FormBuilder);
     private peliculasService = inject(PeliculasService);
+    private tmdbService = inject(TmdbService); 
+
     listaPeliculas = signal<IPelicula[]>([]);
+    terminoBusqueda = signal<string>('');
+    resultadosTmdb = signal<Tmdb[]>([]);
 
     peliculaForm = this.fb.group({
         nombre: ['', Validators.required],
@@ -26,6 +33,34 @@ export class AbmPeliculasComponent implements OnInit {
 
     ngOnInit() {
         this.cargarPeliculas();
+    }
+
+    buscarEnTmdb() {
+        const termino = this.terminoBusqueda().trim();
+        if (!termino) return;
+        
+        this.tmdbService.buscar(termino).subscribe({
+            next: (resultados) => this.resultadosTmdb.set(resultados),
+            error: (err) => console.error('Error buscando en TMDB', err)
+        });
+    }
+
+    seleccionarPelicula(idTmdb: number) {
+        this.tmdbService.detalle(idTmdb).subscribe({
+            next: (peliCompletada) => {
+                this.peliculaForm.patchValue({
+                    nombre: peliCompletada.nombre,
+                    sinopsis: peliCompletada.sinopsis,
+                    imagen_url: peliCompletada.imagen_url,
+                    duracion_minutos: peliCompletada.duracion_minutos,
+                    genero: peliCompletada.genero
+                });
+                
+                this.resultadosTmdb.set([]);
+                this.terminoBusqueda.set('');
+            },
+            error: (err) => console.error('Error trayendo detalles', err)
+        });
     }
 
     async cargarPeliculas() {

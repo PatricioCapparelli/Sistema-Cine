@@ -1,102 +1,106 @@
 <div class="card">
-    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" style="width: 150px;" />
-
+    <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" class="img-portada" (click)="abrirModal()"
+        style="cursor: pointer;" title="Hacé clic para ver la sinopsis, horarios y reseñas" />
     <div class="card-body">
         <h3>{{ peliculaInput()?.nombre }}</h3>
-
         <div class="promedio-badge">
-            ⭐ {{ promedioEstrellas() }} / 5
+            <span class="material-icons estrella-icon">star</span>
+            <span>{{ promedioEstrellas() }} / 5</span>
             <span class="cantidad-reviews">({{ listaResenas().length }} reseñas)</span>
         </div>
-
         <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos | formatoDuracion}}</p>
-        <p>{{ peliculaInput()?.sinopsis }}</p>
+    </div>
+</div>
 
-        @if (modoAdmin()) {
-        <button (click)="onEliminar()">
-            Eliminar Pelicula
-        </button>
-        } @else {
-        <div class="caja-desplegable">
-            <button class="caja-header" (click)="toggleHorarios()">
-                <h4>Horarios disponibles</h4>
-                <span class="icono">{{ mostrarHorarios() ? '▲' : '▼' }}</span>
-            </button>
-
-            @if (mostrarHorarios()) {
-            <div class="caja-body">
-                @for (funcion of funcionesInput(); track funcion.idFuncion) {
-                <div class="horario-badge">
-                    <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
-                    <button [routerLink]="['/ingresar', funcion.idFuncion]">
-                        Comprar
-                    </button>
+@if (modalAbierto()) {
+<div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="btn-cerrar" (click)="cerrarModal()">✖</button>
+        <div class="modal-header">
+            <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" class="img-modal" />
+            <div class="modal-header-texto">
+                <h2>{{ peliculaInput()?.nombre }}</h2>
+                <div class="promedio-badge">
+                    <span class="material-icons estrella-icon">star</span>
+                    <span>{{ promedioEstrellas() }} / 5</span>
+                    <span class="cantidad-reviews">({{ listaResenas().length }} reseñas)</span>
                 </div>
-                } @empty {
-                <p>No hay funciones programadas.</p>
-                }
             </div>
-            }
         </div>
+        <div class="modal-body-scroll">
+            <h4>Sinopsis completa</h4>
+            <p>{{ peliculaInput()?.sinopsis }}</p>
 
-        <div class="caja-desplegable">
-            <button class="caja-header" (click)="toggleResenas()">
-                <h4>Opiniones del público</h4>
-                <span class="icono">{{ mostrarResenas() ? '▲' : '▼' }}</span>
+            @if (modoAdmin()) {
+            <button class="btn-eliminar-admin" (click)="onEliminar()">
+                Eliminar Pelicula
             </button>
+            } @else {
+            <section class="caja">
+                <h4>Horarios disponibles</h4>
+                <div class="caja-body">
+                    @for (funcion of funcionesInput(); track funcion.idFuncion) {
+                    <div class="horario-badge">
+                        <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
+                        <button [routerLink]="['/ingresar', funcion.idFuncion]" class="btn-comprar">
+                            Comprar
+                        </button>
+                    </div>
+                    } @empty {
+                    <p>No hay funciones programadas.</p>
+                    }
+                </div>
+            </section>
 
-            @if (mostrarResenas()) {
-            <div class="caja-body">
-                @if (listaResenas().length === 0) {
-                <p class="sin-resenas">Sé el primero en dejar una reseña.</p>
-                } @else {
-                <div class="lista-comentarios">
-                    @for (resena of listaResenas(); track resena.id) {
-                    <div class="comentario-item">
-                        <div class="header-comentario">
-                            <strong>
-                                {{ resena.Usuarios?.nombre }} {{ resena.Usuarios?.apellido }}
-                            </strong>
-                            <span>⭐ {{ resena.estrellas }}</span>
+            <section class="caja">
+                <h4>Opiniones del público</h4>
+                <div class="caja-body">
+                    @if (listaResenas().length === 0) {
+                    <p class="sin-resenas">Sé el primero en dejar una reseña.</p>
+                    } @else {
+                    <div class="lista-comentarios">
+                        @for (resena of listaResenas(); track resena.id) {
+                        <div class="comentario-item">
+                            <div class="header-comentario">
+                                <strong>{{ resena.Usuarios?.nombre }} {{ resena.Usuarios?.apellido }}</strong>
+                                <span class="puntuacion-resena">
+                                    <span class="material-icons estrella-icon">star</span>
+                                    {{ resena.estrellas }}
+                                </span>
+                            </div>
+                            <p>«{{ resena.comentario }}»</p>
                         </div>
-                        <p>«{{ resena.comentario }}»</p>
+                        }
+                    </div>
+                    }
+
+                    @if (authService.usuarioActual()) {
+                    <div class="formulario-resena">
+                        <h5>Dejá tu opinión</h5>
+                        <div class="input-group">
+                            <label>Calificación:</label>
+                            <select [(ngModel)]="nuevaCalificacion">
+                                <option [value]="5">★★★★★ Excelente</option>
+                                <option [value]="4">★★★★ Muy buena</option>
+                                <option [value]="3">★★★ Regular</option>
+                                <option [value]="2">★★ Mala</option>
+                                <option [value]="1">★ Pésima</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <textarea rows="2" placeholder="¿Qué te pareció?" [(ngModel)]="nuevoComentario"></textarea>
+                        </div>
+                        <button class="btn-publicar" (click)="publicarResena()">Publicar</button>
+                    </div>
+                    } @else {
+                    <div class="aviso-login">
+                        Iniciá sesión para dejar tu reseña.
                     </div>
                     }
                 </div>
-                }
-
-                @if (authService.usuarioActual()) {
-                <div class="formulario-resena">
-                    <h5>Dejá tu opinión</h5>
-
-                    <div class="input-group">
-                        <label>Calificación:</label>
-                        <select [(ngModel)]="nuevaCalificacion">
-                            <option [value]="5">⭐⭐⭐⭐⭐ Excelente</option>
-                            <option [value]="4">⭐⭐⭐⭐ Muy buena</option>
-                            <option [value]="3">⭐⭐⭐ Regular</option>
-                            <option [value]="2">⭐⭐ Mala</option>
-                            <option [value]="1">⭐ Pésima</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group">
-                        <textarea rows="2" placeholder="¿Qué te pareció?" [(ngModel)]="nuevoComentario">
-                        </textarea>
-                    </div>
-
-                    <button class="btn-publicar" (click)="publicarResena()">
-                        Publicar
-                    </button>
-                </div>
-                } @else {
-                <div class="aviso-login">
-                    Iniciá sesión para dejar tu reseña.
-                </div>
-                }
-            </div>
+            </section>
             }
         </div>
-        }
     </div>
 </div>
+}
