@@ -63,7 +63,13 @@ export class FuncionesService {
     }
 
     async registrarVentas(ventas: Venta[]) {
-        const { error } = await this.s.from('Ventas').insert(ventas);
-        if (error) throw new Error('Error al registrar la venta');
+        const { data, error } = await this.s.from('Ventas').insert(ventas).select();
+        
+        if (error) {
+            console.error('Error de Supabase al insertar Venta:', error);
+            throw new Error('Error al registrar la venta');
+        }
+
+        return data; 
     }
 }

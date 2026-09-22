@@ -1,0 +1,83 @@
+<div class="admin-container">
+    <h2>Cargar nuevo producto Candy</h2>
+
+    <form [formGroup]="candyForm" (ngSubmit)="guardarProducto()">
+        <div class="form-group">
+            <label for="nombre">Nombre del Producto:</label>
+            <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Combo Mega Familiar">
+        </div>
+
+        <div class="form-group">
+            <label for="id_categoria">Categoria:</label>
+            <select id="id_categoria" formControlName="id_categoria">
+                <option value="0" disabled>Selecciona una categoria</option>
+                @for (cat of listaCategorias(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripcion:</label>
+            <textarea id="descripcion" formControlName="descripcion" rows="3" placeholder="Balde grande de pochoclos"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="precio">Precio $:</label>
+                <input type="number" id="precio" formControlName="precio">
+            </div>
+            
+            <div class="form-group">
+                <label for="stock">Stock inicial:</label>
+                <input type="number" id="stock" formControlName="stock">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="imagen_url">URL de la Imagen:</label>
+            <input type="url" id="imagen_url" formControlName="imagen_url" placeholder="https://ejemplo.com/pochoclo.jpg">
+        </div>
+
+        @if (candyForm.get('imagen_url')?.value) {
+            <div class="vista-previa-poster">
+                <img [src]="candyForm.get('imagen_url')?.value" alt="Vista previa del producto">
+            </div>
+        }
+
+        <button type="submit" class="btn-guardar" [disabled]="candyForm.invalid">
+            Guardar en Base de Datos
+        </button>
+    </form>
+</div>
+
+<hr class="divisor-abm">
+
+<div class="lista-container">
+    <h2 class="titulo-inventario">Inventario de Candy Bar</h2>
+
+    <div class="grilla-productos">
+        @for (producto of listaProductos(); track producto.id) {
+            <div class="card-producto">
+                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto">
+                <div class="card-body">
+                    <span class="badge-categoria">{{ producto.Categorias_Candy?.nombre }}</span>
+                    
+                    <h3>{{ producto.nombre }}</h3>
+                    <p class="desc">{{ producto.descripcion }}</p>
+                    
+                    <div class="info-precio-stock">
+                        <span class="precio">${{ producto.precio }}</span>
+                        <span class="stock">Stock: {{ producto.stock }}</span>
+                    </div>
+
+                    <button class="btn-eliminar-admin" (click)="eliminarProductoDeBD(producto.id)">
+                        Eliminar Producto
+                    </button>
+                </div>
+            </div>
+        } @empty {
+            <p class="sin-productos">No hay productos cargados todavía.</p>
+        }
+    </div>
+</div>

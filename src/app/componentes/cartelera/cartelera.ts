@@ -65,12 +65,14 @@ export class Cartelera implements OnInit {
       return;
     }
 
-    const filtrados = this.carteleraAgrupadaOriginal().filter(item => {
+    const resultados = this.carteleraAgrupadaOriginal().filter(item => {
       const genero = item.pelicula.genero ? item.pelicula.genero.toLowerCase() : '';
-      return genero.includes(termino);
+      const nombre = item.pelicula.nombre ? item.pelicula.nombre.toLowerCase() : '';
+      
+      return nombre.includes(termino) || genero.includes(termino);
     });
-    
-    this.carteleraAgrupada.set(filtrados);
+  
+    this.carteleraAgrupada.set(resultados);
   }
 
   private agruparPorPelicula(funcionesAbiertas: any[]) {

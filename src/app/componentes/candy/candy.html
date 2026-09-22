@@ -1,0 +1,72 @@
+<div class="checkout-container">
+    
+    <div class="candy-section">
+        <h2>Queres sumar algo para picar?</h2>
+        
+        <div class="grilla-candy">
+            @for (producto of productosDisponibles(); track producto.id) {
+                <div class="card-producto">
+                    <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto">
+                    <div class="card-body">
+                        <h3>{{ producto.nombre }}</h3>
+                        <p class="desc">{{ producto.descripcion }}</p>
+                        <div class="info-precio">
+                            <span class="precio">${{ producto.precio }}</span>
+                            <button class="btn-agregar" (click)="agregar(producto)">+ Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            } @empty {
+                <p>No hay productos disponibles en este momento.</p>
+            }
+        </div>
+    </div>
+
+    <div class="resumen-section">
+        <div class="ticket-resumen">
+            <h3>Resumen de tu Compra</h3>
+            
+            <div class="detalle-bloque">
+                <h4>Entradas</h4>
+                <p><strong>{{ reservaService.detalleFuncion()?.pelicula }}</strong></p>
+                <p>{{ reservaService.detalleFuncion()?.horario }}</p>
+                <p>Butacas: 
+                    @for (b of reservaService.butacasSeleccionadas(); track b.id) {
+                        <span>{{ b.id }} </span>
+                    }
+                </p>
+                <p class="subtotal">Subtotal Entradas: ${{ totalEntradas() }}</p>
+            </div>
+
+            <hr class="divisor">
+
+            <div class="detalle-bloque">
+                <h4>Candy Bar</h4>
+                @for (item of reservaService.carritoCandy(); track item.producto.id) {
+                    <div class="item-carrito">
+                        <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                        <span>${{ item.producto.precio * item.cantidad }}</span>
+                    </div>
+                } @empty {
+                    <p class="sin-candy">No sumaste productos.</p>
+                }
+                <p class="subtotal">Subtotal Candy: ${{ reservaService.totalCandy() }}</p>
+            </div>
+
+            <hr class="divisor-fuerte">
+
+            <div class="total-final">
+                <span>Total a Pagar:</span>
+                <span>${{ granTotal() }}</span>
+            </div>
+
+            <button class="btn-comprar-final" (click)="confirmarCompraFinal()">
+                Confirmar y Pagar
+            </button>
+            
+            <button class="btn-secundario" routerLink="/cartelera">
+                Cancelar Compra
+            </button>
+        </div>
+    </div>
+</div>

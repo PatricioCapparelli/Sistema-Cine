@@ -1,9 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { FuncionesService } from '../../core/services/funciones.service';
-import { Ticket } from '../../core/services/ticket.service';
-import { Venta } from '../../core/interfaces/Venta';
+import { ReservaService } from '../../core/services/reserva.service'; 
 import { Butaca } from '../../core/interfaces/Butaca';
 
 @Component({
@@ -13,27 +11,17 @@ import { Butaca } from '../../core/interfaces/Butaca';
   styleUrl: './butacas.css'
 })
 export class Butacas implements OnInit {
-  private sesionCompra = inject(SesionCompraService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private funcionesService = inject(FuncionesService); 
-  private ticketService = inject(Ticket);
-  private compraVenta = inject(SesionCompraService)
+  private reservaService = inject(ReservaService); 
   
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
   idFuncion = signal<string | null>(null);
-  
   detalleFuncion = signal<{ pelicula: string, horario: string } | null>(null);
+  
   cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
-
-  totalAPagar = computed(() => {
-    const cantidad = this.cantidadSeleccionadas();
-    const precioBruto = cantidad * this.sesionCompra.precioBaseEntrada;
-    const descuento = this.sesionCompra.descuentoAplicado();
-
-    return precioBruto - (precioBruto * (descuento / 100));
-  });
 
   ngOnInit() {
     this.idFuncion.set(this.route.snapshot.paramMap.get('id'));
@@ -54,7 +42,6 @@ export class Butacas implements OnInit {
         numero: j + 1,
         estado: 'libre'
       }));
-
       nuevaMatriz.push(butacasFila);
     }
     this.matrizSala.set(nuevaMatriz);
@@ -116,59 +103,23 @@ export class Butacas implements OnInit {
     }
   }
 
-  async confirmarCompra() {
+  continuarACandy() {
     const idFunc = this.idFuncion();
     const cantidad = this.cantidadSeleccionadas();
 
     if (!idFunc) {
-      alert('Error crítico: No se identificó la función.');
+      alert('Error: No se identifico la funcion.');
       return;
     }
     if (cantidad === 0) {
-      alert('Debes seleccionar al menos una butaca.');
+      alert('Debes seleccionar al menos una butaca para continuar.');
       return;
     }
 
-    try {
-      const datosUsuario = this.sesionCompra.datosUsuario();
-      const esAnonimo = this.sesionCompra.esAnonimo();
-      const total = this.totalAPagar();
-      const precioPorButaca = total / cantidad;
+    this.reservaService.idFuncionSeleccionada.set(idFunc);
+    this.reservaService.detalleFuncion.set(this.detalleFuncion());
+    this.reservaService.butacasSeleccionadas.set(this.butacasSeleccionadas());
 
-      const ticketsAInsertar: Venta[] = this.butacasSeleccionadas().map(butaca => ({
-        funcion_id: idFunc,
-        usuario_id: !esAnonimo && datosUsuario ? datosUsuario.id : null,
-        email_comprador: this.sesionCompra.emailComprador(),
-        monto_total: precioPorButaca,
-        butaca_id: butaca.id
-      }));
-
-      await this.funcionesService.registrarVentas(ticketsAInsertar);
-
-      if (!esAnonimo && datosUsuario?.uso_cupon === false) {
-        try {
-          await this.compraVenta.marcarCuponUsado(datosUsuario.id);
-        } catch (errorUsuario) {
-          console.error('Error al actualizar el cupon', errorUsuario);
-        }
-      }
-
-      const butacasCompradas = this.butacasSeleccionadas().map(b => b.id);
-      const detalles = this.detalleFuncion();
-      
-      await this.ticketService.generarTicketsPDF(
-        detalles?.pelicula || 'Película UTN', 
-        detalles?.horario || new Date().toLocaleString(),
-        butacasCompradas,
-        total
-      );
-
-      alert(`¡Compra exitosa! Revisa tus descargas para ver el ticket.`);
-      this.router.navigate(['/cartelera']);
-
-    } catch (error) {
-      console.error('Error procesando la compra:', error);
-      alert('Hubo un error al procesar tu compra. Revisá la consola.');
-    }
+    this.router.navigate(['/candy']);
   }
 }

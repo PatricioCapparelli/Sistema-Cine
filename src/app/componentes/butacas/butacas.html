@@ -1,16 +1,18 @@
 <div class="contenedor-sala">
-
     <div class="pantalla">PANTALLA</div>
 
     <div class="grilla">
         @for (fila of matrizSala(); track $index) {
         <div class="fila-butacas">
             <div class="letra-fila">{{ fila[0].fila }}</div>
+            
             <div class="bloque">
                 @for (butaca of fila.slice(0, 4); track butaca.id) {
-                <button class="butaca" [class.libre]="butaca.estado === 'libre'"
+                <button class="butaca" 
+                    [class.libre]="butaca.estado === 'libre'"
                     [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" (click)="seleccionarButaca(butaca)">
+                    [class.ocupada]="butaca.estado === 'ocupada'" 
+                    (click)="seleccionarButaca(butaca)">
                     {{ butaca.numero }}
                 </button>
                 }
@@ -20,9 +22,11 @@
 
             <div class="bloque">
                 @for (butaca of fila.slice(4, 24); track butaca.id) {
-                <button class="butaca" [class.libre]="butaca.estado === 'libre'"
+                <button class="butaca" 
+                    [class.libre]="butaca.estado === 'libre'"
                     [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" (click)="seleccionarButaca(butaca)">
+                    [class.ocupada]="butaca.estado === 'ocupada'" 
+                    (click)="seleccionarButaca(butaca)">
                     {{ butaca.numero }}
                 </button>
                 }
@@ -32,9 +36,11 @@
 
             <div class="bloque">
                 @for (butaca of fila.slice(24, 28); track butaca.id) {
-                <button class="butaca" [class.libre]="butaca.estado === 'libre'"
+                <button class="butaca" 
+                    [class.libre]="butaca.estado === 'libre'"
                     [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" (click)="seleccionarButaca(butaca)">
+                    [class.ocupada]="butaca.estado === 'ocupada'" 
+                    (click)="seleccionarButaca(butaca)">
                     {{ butaca.numero }}
                 </button>
                 }
@@ -47,9 +53,16 @@
         <div class="resumen-compra">
             <h3>Asientos seleccionados: {{ cantidadSeleccionadas() }}</h3>
             
-            <h4 class="precio-total">Total a pagar: ${{ totalAPagar() }}</h4>
+            <p class="detalle-butacas">
+                Butacas: 
+                @for (b of butacasSeleccionadas(); track b.id) {
+                    <strong>{{ b.id }} </strong>
+                }
+            </p>
             
-            <button class="btn-pagar" (click)="confirmarCompra()">Confirmar y Pagar</button>
+            <button class="btn-pagar" (click)="continuarACandy()">
+                Siguiente: Candy Bar 
+            </button>
         </div>
     }
 </div>

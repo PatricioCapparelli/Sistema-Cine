@@ -22,6 +22,11 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/abm-promociones/abm-promociones').then(m => m.AbmPromocionesComponent)
     },
     {
+        path: 'admin/candy',
+        canActivate: [logueadoGuard, adminGuard], 
+        loadComponent: () => import('./admin/abm-candy/abm-candy').then(m => m.AbmCandyComponent)
+    },
+    {
         path: 'ingresar/:id',
         loadComponent: () => import('./componentes/ingresar/ingresar').then(m => m.Ingresar)
     },
@@ -29,6 +34,11 @@ export const routes: Routes = [
         path: 'comprar/:id',
         canActivate: [compraGuard],
         loadComponent: () => import('./componentes/butacas/butacas').then(m => m.Butacas)
+    },
+    {
+        path: 'candy',
+        canActivate: [compraGuard],
+        loadComponent: () => import('./componentes/candy/candy').then(m => m.Candy)
     },
 
     { path: '', redirectTo: 'cartelera', pathMatch: 'full' },

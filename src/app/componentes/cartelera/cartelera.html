@@ -17,7 +17,7 @@
                             <img [src]="peli.imagen_url" [alt]="peli.nombre">
                             <div class="info-top">
                                 <h3>{{ peli.nombre }}</h3>
-                                <p class="tickets-vendidos">🎟️ {{ peli.totalTickets }} entradas vendidas</p>
+                                <p class="tickets-vendidos">{{ peli.totalTickets }} entradas vendidas</p>
                             </div>
                         </div>
                     }
@@ -31,7 +31,7 @@
         <div class="barra-busqueda">
             <input 
                 type="text" 
-                placeholder="Buscar por género... (Ej: Acción, Terror)" 
+                placeholder="Buscar por titulo/genero" 
                 [(ngModel)]="terminoBusqueda" 
                 (keyup.enter)="buscar()">
             <button class="btn-buscar" (click)="buscar()">Buscar</button>
