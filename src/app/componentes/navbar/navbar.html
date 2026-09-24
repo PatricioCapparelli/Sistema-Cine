@@ -12,8 +12,13 @@
         <li><a routerLink="/admin/funciones">Administrar Funciones</a></li>
         <li><a routerLink="/admin/promociones">Administrar Promociones</a></li>
         <li><a routerLink="/admin/candy">Administrar Candy</a></li>
+        <li><a routerLink="/admin/usuarios">Administrar Usuarios</a></li>
         }
     </ul>
+
+    @if (authS.rolActual() === 'empleado' || authS.rolActual() === 'admin') {
+    <a routerLink="/escaner" class="btn-empleado">Escanear Entradas</a>
+    }
 
     <div class="auth-actions">
         @if (authS.usuarioActual()) {

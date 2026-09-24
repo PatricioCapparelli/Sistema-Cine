@@ -1,0 +1,35 @@
+<div class="admin-container">
+    <h2>Gestion de Personal y Clientes</h2>
+    <p>Administra los niveles de acceso de los usuarios registrados en el sistema.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Rol Actual</th>
+                <th>Accion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (user of listaUsuarios(); track user.id) {
+            <tr>
+                <td>{{ user.apellido }}</td>
+                <td>{{ user.nombre }}</td>
+                <td>
+                    <select #selectRol [value]="user.rol">
+                        <option value="cliente">Cliente</option>
+                        <option value="empleado">Empleado</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn-guardar" (click)="actualizarRol(user.id, selectRol.value)">
+                        Guardar Cambios
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

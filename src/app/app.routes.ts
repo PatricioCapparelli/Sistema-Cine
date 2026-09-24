@@ -3,6 +3,7 @@ import { publicRoutes } from './public/public.routes';
 import { logueadoGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { compraGuard } from './core/guards/compra.guard';
+import { empleadoGuard } from './core/guards/empleado.guard';
 
 export const routes: Routes = [
     ...publicRoutes,
@@ -25,6 +26,16 @@ export const routes: Routes = [
         path: 'admin/candy',
         canActivate: [logueadoGuard, adminGuard], 
         loadComponent: () => import('./admin/abm-candy/abm-candy').then(m => m.AbmCandyComponent)
+    },
+    {
+        path: 'admin/usuarios',
+        canActivate: [logueadoGuard, adminGuard], 
+        loadComponent: () => import('./admin/abm-usuarios/abm-usuarios').then(m => m.AbmUsuariosComponent)
+    },
+    {
+        path: 'escaner',
+        canActivate: [logueadoGuard, empleadoGuard], 
+        loadComponent: () => import('./componentes/escaner-qr/escaner-qr').then(m => m.EscanerQrComponent) 
     },
     {
         path: 'ingresar/:id',

@@ -1,6 +1,6 @@
 <div class="admin-container">
     <h2>Administrar Horarios de Funciones</h2>
-    <p>Asigna horarios a las peliculas respetando los 30 minutos de limpieza de la sala.</p>
+    <p>Asigna horarios a las películas. El sistema buscará una sala disponible automáticamente respetando los 30 minutos de limpieza.</p>
 
     <form [formGroup]="formulario" (ngSubmit)="guardarFuncion()" class="formulario-admin">
 
@@ -11,17 +11,6 @@
 
                 @for (peli of peliculas; track peli.id) {
                 <option [value]="peli.id">{{ peli.nombre }}</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="sala_id">Sala:</label>
-            <select id="sala_id" formControlName="sala_id">
-                <option value="" disabled selected>Seleccione la sala...</option>
-
-                @for (sala of salas; track sala.id) {
-                <option [value]="sala.id">{{ sala.nombre }}</option>
                 }
             </select>
         </div>
@@ -52,7 +41,7 @@
         </div>
 
         <button type="submit" [disabled]="formulario.invalid" class="btn-guardar">
-            Guardar Función
+            Programar Función
         </button>
 
     </form>

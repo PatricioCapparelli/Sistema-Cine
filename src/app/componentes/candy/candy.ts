@@ -58,7 +58,7 @@ export class Candy implements OnInit {
     this.reservaService.agregarAlCarrito(producto);
   }
 
-  async confirmarCompraFinal() {
+ async confirmarCompraFinal() {
     const idFunc = this.reservaService.idFuncionSeleccionada();
     const butacas = this.reservaService.butacasSeleccionadas();
     const carrito = this.reservaService.carritoCandy();
@@ -84,9 +84,11 @@ export class Candy implements OnInit {
 
       const ventasGeneradas = await this.funcionesService.registrarVentas(ticketsAInsertar);
 
-      if (carrito.length > 0 && ventasGeneradas && ventasGeneradas.length > 0) {
-        const idTicketPrincipal = ventasGeneradas[0].id; 
+      // 1. CAPTURA GLOBAL DEL ID: Lo sacamos del 'if' para asegurar que el QR 
+      // siempre tenga el UUID válido, sin importar si compró pochoclos o no.
+      const idTicketPrincipal = ventasGeneradas[0].id; 
 
+      if (carrito.length > 0 && ventasGeneradas && ventasGeneradas.length > 0) {
         const itemsCandyAInsertar = carrito.map(item => ({
             id_ticket: idTicketPrincipal, 
             id_producto: item.producto.id,
@@ -104,14 +106,17 @@ export class Candy implements OnInit {
       const butacasIds = butacas.map(b => b.id);
       const detalles = this.reservaService.detalleFuncion();
       
+      // 2. ACTUALIZACIÓN DEL SERVICIO PDF
       await this.ticketService.generarTicketsPDF(
         detalles?.pelicula || 'Pelicula', 
         detalles?.horario || new Date().toLocaleString(),
+        detalles?.sala || 'Sala a confirmar', 
         butacasIds,
-        this.granTotal()
+        this.granTotal(),
+        idTicketPrincipal 
       );
 
-      alert(`Compra exitosa! Se descargara tu comprobante.`);
+      alert(`¡Compra exitosa! Se descargará tu comprobante.`);
       
       this.reservaService.peliculaSeleccionada.set(null);
       this.reservaService.butacasSeleccionadas.set([]);

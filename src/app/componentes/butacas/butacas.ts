@@ -19,7 +19,7 @@ export class Butacas implements OnInit {
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
   idFuncion = signal<string | null>(null);
-  detalleFuncion = signal<{ pelicula: string, horario: string } | null>(null);
+  detalleFuncion = signal<{ pelicula: string, horario: string, sala: string } | null>(null);
   
   cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
 
@@ -56,7 +56,8 @@ export class Butacas implements OnInit {
       if (data) {
         this.detalleFuncion.set({
           pelicula: (data.Peliculas as any).nombre,
-          horario: new Date(data.fecha_hora_inicio).toLocaleString()
+          horario: new Date(data.fecha_hora_inicio).toLocaleString(),
+          sala: (data.Salas as any).nombre 
         });
       }
     } catch (error) {

@@ -8,25 +8,25 @@ import { Router } from '@angular/router';
 export class Auth {
     private supabaseS = inject(Supabase);
     private routerS = inject(Router);
-
+    private s = this.supabaseS.Supabase
     public usuarioActual: WritableSignal<User | null> = signal<User | null>(null);
     public rolActual: WritableSignal<string | null> = signal<string | null>(null);
 
     constructor() {
-        this.supabaseS.Supabase.auth.onAuthStateChange(async (event, session) => {
+        this.s.auth.onAuthStateChange(async (event, session) => {
             if (session?.user) {
                 this.usuarioActual.set(session.user);
-                
+
                 const { data, error } = await this.supabaseS.Supabase
                     .from('Usuarios')
                     .select('rol')
                     .eq('id', session.user.id)
                     .maybeSingle();
-                
+
                 if (!error && data) {
                     this.rolActual.set(data.rol);
                 } else {
-                    this.rolActual.set('cliente'); 
+                    this.rolActual.set('cliente');
                 }
 
             } else {
@@ -37,7 +37,7 @@ export class Auth {
     }
 
     public async registrar(usuario: IAuthData) {
-        const respuesta = await this.supabaseS.Supabase.auth.signUp({
+        const respuesta = await this.s.auth.signUp({
             email: usuario.email,
             password: usuario.password
         });
@@ -46,15 +46,15 @@ export class Auth {
 
         if (respuesta.data.user) {
             const nuevoUsuario: IUsuario = {
-                id: respuesta.data.user.id, 
+                id: respuesta.data.user.id,
                 nombre: usuario.nombre,
                 apellido: usuario.apellido,
                 fecha_nacimiento: usuario.fecha_nacimiento,
                 tipo_sangre: usuario.tipo_sangre,
                 color_ojos: usuario.color_ojos,
                 dias_vacaciones: usuario.dias_vacaciones,
-                uso_cupon: false, 
-                rol: 'cliente'     
+                uso_cupon: false,
+                rol: 'cliente'
             };
 
             const { error: dbError } = await this.supabaseS.Supabase
@@ -69,7 +69,7 @@ export class Auth {
     }
 
     async loguear(usuario: Pick<IAuthData, 'email' | 'password'>) {
-        const { data, error } = await this.supabaseS.Supabase.auth.signInWithPassword({
+        const { data, error } = await this.s.auth.signInWithPassword({
             email: usuario.email,
             password: usuario.password!,
         });
@@ -81,9 +81,29 @@ export class Auth {
     }
 
     async cerrarSesion() {
-        const { error } = await this.supabaseS.Supabase.auth.signOut();
+        const { error } = await this.s.auth.signOut();
         if (error) throw error;
 
         this.routerS.navigateByUrl('/cartelera');
+    }
+
+    async obtenerTodosLosUsuarios() {
+        const { data, error } = await this.s.from('Usuarios')
+            .select('id, apellido, nombre, rol')
+            .order('rol', { ascending: true }); 
+
+        if (error) throw new Error('Error al cargar los usuarios');
+        return data;
+    }
+
+    async cambiarRolUsuario(idUsuario: string, nuevoRol: string) {
+        const { error } = await this.s.from('Usuarios')
+            .update({ rol: nuevoRol })
+            .eq('id', idUsuario);
+
+        if (error) {
+            console.error('Error de Supabase al cambiar rol:', error);
+            throw error; 
+        }
     }
 }

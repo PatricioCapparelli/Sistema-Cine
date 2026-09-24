@@ -1,0 +1,26 @@
+<div class="escaner-container">
+    <h2>Control de Acceso</h2>
+    <p>Escaneá el código QR del cliente.</p>
+
+    <div class="camara-wrapper">
+        <zxing-scanner [enable]="escaneando" (scanSuccess)="procesarQR($event)">
+        </zxing-scanner>
+    </div>
+
+    @if (mensajeResultado) {
+    <div class="resultado-box" [ngClass]="claseResultado">
+        <h3>{{ mensajeResultado }}</h3>
+
+        @if (candyResultados.length > 0) {
+        <div class="candy-alerta">
+            <h4>ATENCION: Entregar Combo:</h4>
+            <ul>
+                @for (item of candyResultados; track item) {
+                <li>{{ item.cantidad }}x {{ item.Productos_Candy.nombre }}</li>
+                }
+            </ul>
+        </div>
+        }
+    </div>
+    }
+</div>

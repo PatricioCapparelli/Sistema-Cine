@@ -7,7 +7,7 @@ export class ReservaService {
     peliculaSeleccionada = signal<any>(null);
     butacasSeleccionadas = signal<Butaca[]>([]);
     idFuncionSeleccionada = signal<string | null>(null);
-    detalleFuncion = signal<{ pelicula: string, horario: string } | null>(null);
+    detalleFuncion = signal<{ pelicula: string, horario: string, sala: string } | null>(null);
     carritoCandy = signal<{ producto: IProductoCandy, cantidad: number }[]>([]);
 
     totalCandy = computed(() => {
