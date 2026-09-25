@@ -3,24 +3,38 @@
     <p>Escaneá el código QR del cliente.</p>
 
     <div class="camara-wrapper">
-        <zxing-scanner [enable]="escaneando" (scanSuccess)="procesarQR($event)">
+        <!-- Un solo escáner con todos sus eventos -->
+        <zxing-scanner 
+            [enable]="escaneando" 
+            (scanSuccess)="procesarQR($event)"
+            (scanFailure)="silenciarRuido()">
         </zxing-scanner>
     </div>
 
-    @if (mensajeResultado) {
-    <div class="resultado-box" [ngClass]="claseResultado">
-        <h3>{{ mensajeResultado }}</h3>
-
-        @if (candyResultados.length > 0) {
-        <div class="candy-alerta">
-            <h4>ATENCION: Entregar Combo:</h4>
-            <ul>
-                @for (item of candyResultados; track item) {
-                <li>{{ item.cantidad }}x {{ item.Productos_Candy.nombre }}</li>
-                }
-            </ul>
+    <div class="ingreso-manual">
+        <p>¿No funciona el lector? Ingresá el código corto de 6 caracteres.</p>
+        <div class="input-grupo">
+            <input type="text" #codigoManual placeholder="Ej: A7B9X2" maxlength="6" style="text-transform: uppercase;">
+            <button class="btn-guardar" (click)="procesarQR(codigoManual.value)">
+                Validar Manual
+            </button>
         </div>
-        }
     </div>
+
+    @if (mensajeResultado) {
+        <div class="resultado-box" [ngClass]="claseResultado">
+            <h3>{{ mensajeResultado }}</h3>
+
+            @if (candyResultados.length > 0) {
+                <div class="candy-alerta">
+                    <h4>🍿 ATENCION: Entregar Combo:</h4>
+                    <ul>
+                        @for (item of candyResultados; track item) {
+                            <li>{{ item.cantidad }}x {{ item.Productos_Candy.nombre }}</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
     }
 </div>

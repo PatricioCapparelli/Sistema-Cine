@@ -60,3 +60,28 @@
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
+
+.ingreso-manual {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--crema);
+    border: 1px dashed var(--marron-claro);
+    border-radius: 8px;
+}
+
+.input-grupo {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.input-grupo input {
+    padding: 10px;
+    font-size: 1.1rem;
+    border: 1px solid var(--marron-gris);
+    border-radius: 4px;
+    width: 150px;
+    text-align: center;
+    color: var(--marron-oscuro);
+}

@@ -17,7 +17,7 @@ import { Venta } from '../../core/interfaces/Venta';
 })
 export class Candy implements OnInit {
   private candyService = inject(CandyService);
-  public reservaService = inject(ReservaService); 
+  public reservaService = inject(ReservaService);
   private sesionCompra = inject(SesionCompraService);
   private funcionesService = inject(FuncionesService);
   private ticketService = inject(Ticket);
@@ -58,7 +58,7 @@ export class Candy implements OnInit {
     this.reservaService.agregarAlCarrito(producto);
   }
 
- async confirmarCompraFinal() {
+  async confirmarCompraFinal() {
     const idFunc = this.reservaService.idFuncionSeleccionada();
     const butacas = this.reservaService.butacasSeleccionadas();
     const carrito = this.reservaService.carritoCandy();
@@ -72,28 +72,28 @@ export class Candy implements OnInit {
     try {
       const datosUsuario = this.sesionCompra.datosUsuario();
       const esAnonimo = this.sesionCompra.esAnonimo();
-      
+
       const precioPorButaca = this.totalEntradas() / butacas.length;
       const ticketsAInsertar: Venta[] = butacas.map(butaca => ({
         funcion_id: idFunc,
         usuario_id: !esAnonimo && datosUsuario ? datosUsuario.id : null,
         email_comprador: this.sesionCompra.emailComprador(),
         monto_total: precioPorButaca,
-        butaca_id: butaca.id
+        butaca_id: butaca.id,
+        codigo_manual: this.generarCodigoManual()
       }));
 
       const ventasGeneradas = await this.funcionesService.registrarVentas(ticketsAInsertar);
 
-      // 1. CAPTURA GLOBAL DEL ID: Lo sacamos del 'if' para asegurar que el QR 
-      // siempre tenga el UUID válido, sin importar si compró pochoclos o no.
-      const idTicketPrincipal = ventasGeneradas[0].id; 
+      const idTicketPrincipal = ventasGeneradas[0].id;
+      const codigoManualPrincipal = ventasGeneradas[0].codigo_manual;
 
       if (carrito.length > 0 && ventasGeneradas && ventasGeneradas.length > 0) {
         const itemsCandyAInsertar = carrito.map(item => ({
-            id_ticket: idTicketPrincipal, 
-            id_producto: item.producto.id,
-            cantidad: item.cantidad,
-            precio_unitario: item.producto.precio
+          id_ticket: idTicketPrincipal,
+          id_producto: item.producto.id,
+          cantidad: item.cantidad,
+          precio_unitario: item.producto.precio
         }));
 
         await this.candyService.registrarVentaCandy(itemsCandyAInsertar);
@@ -105,24 +105,24 @@ export class Candy implements OnInit {
 
       const butacasIds = butacas.map(b => b.id);
       const detalles = this.reservaService.detalleFuncion();
-      
-      // 2. ACTUALIZACIÓN DEL SERVICIO PDF
+
       await this.ticketService.generarTicketsPDF(
-        detalles?.pelicula || 'Pelicula', 
+        detalles?.pelicula || 'Pelicula',
         detalles?.horario || new Date().toLocaleString(),
-        detalles?.sala || 'Sala a confirmar', 
+        detalles?.sala || 'Sala a confirmar',
         butacasIds,
         this.granTotal(),
-        idTicketPrincipal 
+        idTicketPrincipal,
+        codigoManualPrincipal 
       );
 
-      alert(`¡Compra exitosa! Se descargará tu comprobante.`);
-      
+      alert(`Compra exitosa! Se descargara tu comprobante.`);
+
       this.reservaService.peliculaSeleccionada.set(null);
       this.reservaService.butacasSeleccionadas.set([]);
       this.reservaService.idFuncionSeleccionada.set(null);
       this.reservaService.carritoCandy.set([]);
-      
+
       this.router.navigate(['/cartelera']);
 
     } catch (error) {
@@ -131,5 +131,14 @@ export class Candy implements OnInit {
     } finally {
       this.loadingService.ocultar();
     }
+  }
+
+  generarCodigoManual(): string {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let codigo = '';
+    for (let i = 0; i < 6; i++) {
+      codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return codigo;
   }
 }
