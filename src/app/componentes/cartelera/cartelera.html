@@ -40,9 +40,9 @@
 
     <section class="catalogo-section">
         @if (cargando()) {
-            <p class="mensaje-estado">Buscando funciones disponibles...</p>
+            <p class="mensaje-estado">Buscando funciones disponibles.</p>
         } @else if (carteleraAgrupada().length === 0) {
-            <p class="mensaje-estado">No hay funciones programadas o no coinciden con tu búsqueda.</p>
+            <p class="mensaje-estado">No hay funciones programadas o no coinciden con tu busqueda.</p>
         } @else {
             <div class="grilla-peliculas">
                 @for (item of carteleraAgrupada(); track item.pelicula.id) {

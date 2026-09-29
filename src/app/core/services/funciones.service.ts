@@ -142,7 +142,7 @@ export class FuncionesService {
 
     async obtenerDetalleFuncion(id: string) {
         const { data, error } = await this.s.from('Funciones')
-            .select('fecha_hora_inicio, Peliculas(nombre), Salas(nombre)')
+            .select('fecha_hora_inicio, Peliculas(nombre, edad_minima), Salas(nombre)')
             .eq('id', id)
             .single();
             
@@ -170,12 +170,10 @@ export class FuncionesService {
         return data;
     }
 
-    // --- VERSIÓN REFACTORIZADA Y SEGURA DEL ESCÁNER ---
     async validarTicketEscaneado(codigo: string) {
         const esUUID = codigo.length > 10;
         const codigoLimpio = esUUID ? codigo : codigo.toUpperCase().trim();
 
-        // Buscamos cruzando por Funciones para poder acceder a Peliculas sin error de relación
         let query = this.s.from('Ventas')
             .select('id, entrada_usada, butaca_id, codigo_manual, Funciones(Peliculas(nombre))');
 
@@ -185,23 +183,21 @@ export class FuncionesService {
             query = query.eq('codigo_manual', codigoLimpio).limit(1);
         }
 
-        // Usamos maybeSingle para no romper si hay códigos repetidos
         const { data: ticket, error: ticketError } = await query.maybeSingle();
 
         if (ticketError) {
-            console.error("Error BD Escáner:", ticketError);
-            throw new Error(`Falla técnica BD: ${ticketError.message}`);
+            console.error("Error BD Escaner:", ticketError);
+            throw new Error(`Falla tecnica BD: ${ticketError.message}`);
         }
 
         if (!ticket) {
-            throw new Error(`No se encontró el código: "${codigoLimpio}".`);
+            throw new Error(`No se encontro el codigo: "${codigoLimpio}".`);
         }
 
         if (ticket.entrada_usada) {
-            throw new Error(`¡ALERTA! Este ticket ya fue utilizado. (Butaca: ${ticket.butaca_id})`);
+            throw new Error(`ALERTA! Este ticket ya fue utilizado. (Butaca: ${ticket.butaca_id})`);
         }
 
-        // Actualizamos a usado usando SIEMPRE el UUID seguro
         const { error: updateError } = await this.s.from('Ventas')
             .update({ entrada_usada: true })
             .eq('id', ticket.id);
@@ -210,16 +206,14 @@ export class FuncionesService {
             throw new Error('Error al actualizar el ticket en el sistema.');
         }
 
-        // Buscamos si tiene Candy
         const { data: candy } = await this.s.from('Venta_Candy')
             .select('cantidad, Productos_Candy(nombre)')
             .eq('id_ticket', ticket.id);
 
-        // Extraemos el nombre de la peli de forma segura navegando las relaciones
-        const nombrePeli = (ticket.Funciones as any)?.Peliculas?.nombre || 'Película desconocida';
+        const nombrePeli = (ticket.Funciones as any)?.Peliculas?.nombre || 'Pelicula desconocida';
 
         return {
-            mensaje: `Ticket Válido. Pase a Butaca ${ticket.butaca_id}`,
+            mensaje: `Ticket Valido. Pase a Butaca ${ticket.butaca_id}`,
             pelicula: nombrePeli,
             candy: candy || []
         };

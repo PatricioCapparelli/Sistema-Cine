@@ -2,27 +2,24 @@
     <div class="modulo-importacion">
         <h3>Importar desde TMDB</h3>
         <div class="buscador-tmdb">
-            <input 
-                type="text" 
-                [(ngModel)]="terminoBusqueda" 
-                placeholder="Buscar película..." 
-                (keyup.enter)="buscarEnTmdb()"
-            >
+            <input type="text" [(ngModel)]="terminoBusqueda" placeholder="Buscar película..."
+                (keyup.enter)="buscarEnTmdb()">
             <button class="btn-buscar" (click)="buscarEnTmdb()">Buscar</button>
         </div>
 
         @if (resultadosTmdb().length > 0) {
-            <ul class="lista-resultados">
-                @for (peli of resultadosTmdb(); track peli.id) {
-                    <li class="item-resultado" (click)="seleccionarPelicula(peli.id)">
-                        <img [src]="peli.poster_path ? 'https://image.tmdb.org/t/p/w92' + peli.poster_path : 'assets/no-image.jpg'" [alt]="peli.title">
-                        <div class="info-resultado">
-                            <strong>{{ peli.title }}</strong>
-                            <small>{{ peli.release_date | slice:0:4 }}</small>
-                        </div>
-                    </li>
-                }
-            </ul>
+        <ul class="lista-resultados">
+            @for (peli of resultadosTmdb(); track peli.id) {
+            <li class="item-resultado" (click)="seleccionarPelicula(peli.id)">
+                <img [src]="peli.poster_path ? 'https://image.tmdb.org/t/p/w92' + peli.poster_path : 'assets/no-image.jpg'"
+                    [alt]="peli.title">
+                <div class="info-resultado">
+                    <strong>{{ peli.title }}</strong>
+                    <small>{{ peli.release_date | slice:0:4 }}</small>
+                </div>
+            </li>
+            }
+        </ul>
         }
     </div>
 
@@ -56,10 +53,18 @@
             <input type="text" formControlName="genero" placeholder="Ej: Acción, Drama...">
         </div>
 
+        <label for="edad_minima">Edad mínima</label>
+        <select id="edad_minima" formControlName="edad_minima">
+            <option [ngValue]="0">ATP (todo publico)</option>
+            <option [ngValue]="13">+13</option>
+            <option [ngValue]="16">+16</option>
+            <option [ngValue]="18">+18</option>
+        </select>
+
         @if (peliculaForm.get('imagen_url')?.value) {
-            <div class="vista-previa-poster">
-                <img [src]="peliculaForm.get('imagen_url')?.value" alt="Vista previa">
-            </div>
+        <div class="vista-previa-poster">
+            <img [src]="peliculaForm.get('imagen_url')?.value" alt="Vista previa">
+        </div>
         }
 
         <button type="submit" [disabled]="peliculaForm.invalid">
@@ -75,13 +80,10 @@
 
     <div class="peliculas">
         @for (pelicula of listaPeliculas(); track pelicula.id) {
-            <app-pelicula 
-                [peliculaInput]="pelicula" 
-                [modoAdmin]="true" 
-                (eliminarOutput)="eliminarPeliculaDeBD($event)">
-            </app-pelicula>
+        <app-pelicula [peliculaInput]="pelicula" [modoAdmin]="true" (eliminarOutput)="eliminarPeliculaDeBD($event)">
+        </app-pelicula>
         } @empty {
-            <p>No hay peliculas cargadas todavia.</p>
+        <p>No hay peliculas cargadas todavia.</p>
         }
     </div>
 </div>

@@ -28,7 +28,8 @@ export class AbmPeliculasComponent implements OnInit {
         sinopsis: ['', Validators.required],
         imagen_url: ['', Validators.required],
         duracion_minutos: [0, [Validators.required, Validators.min(1)]],
-        genero: ['', Validators.required]
+        genero: ['', Validators.required],
+        edad_minima: [0, [Validators.required, Validators.min(0)]]
     });
 
     ngOnInit() {
@@ -79,7 +80,7 @@ export class AbmPeliculasComponent implements OnInit {
                 await this.peliculasService.crearPelicula(nuevaPelicula);
 
                 alert('Pelicula guardada con exito');
-                this.peliculaForm.reset();
+                this.peliculaForm.reset({ duracion_minutos: 0, edad_minima: 0 });
 
                 this.cargarPeliculas();
             } catch (error) {

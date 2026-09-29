@@ -1,32 +1,81 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Auth } from '../../core/services/auth.service'; 
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { SesionCompraService } from '../../core/services/sesion-compra.service';
+import { Auth } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './login.html', 
+  templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private sesionCompra = inject(SesionCompraService);
   private fb = inject(FormBuilder);
-  private authS = inject(Auth);
+  private auth = inject(Auth);
 
-  loginForm = this.fb.group({
+  edadMinima = signal(0);
+  idFuncion = signal<string | null>(null);
+  mostrarInputAnonimo = signal(false);
+  
+  loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', Validators.required]
   });
 
-  async ingresar() {
+  emailAnonimoControl = new FormControl('', [Validators.required, Validators.email]);
+
+  ngOnInit() {
+  this.route.queryParams.subscribe(params => {
+    if (params['funcionId']) {
+      this.idFuncion.set(params['funcionId']);
+    }
+    this.edadMinima.set(Number(params['edadMinima']) || 0);
+  });
+}
+
+  async iniciarSesion() {
     if (this.loginForm.valid) {
       try {
-        await this.authS.loguear(this.loginForm.value as any);
+        const credenciales = {
+          email: this.loginForm.value.email,
+          password: this.loginForm.value.password
+        };
+
+        await this.auth.loguear(credenciales);
+
+        setTimeout(() => {
+            this.ejecutarRedireccion();
+        }, 500);
+
       } catch (error) {
-        console.error('Error al iniciar sesión', error);
-        alert('Credenciales inválidas o error.');
+        console.error('Error de autenticación:', error);
+        alert('Credenciales incorrectas. Intentá nuevamente.');
       }
+    }
+  }
+
+  continuarComoAnonimo() {
+  if (this.edadMinima() > 0) {
+    alert(`Las películas +${this.edadMinima()} no se pueden comprar como invitado. Iniciá sesión.`);
+    return;
+  }
+  if (this.emailAnonimoControl.valid) {
+    this.sesionCompra.iniciarComoAnonimo(this.emailAnonimoControl.value!);
+    this.ejecutarRedireccion();
+  }
+}
+
+  private ejecutarRedireccion() {
+    const id = this.idFuncion();
+    if (id) {
+      this.router.navigate(['/comprar', id]);
+    } else {
+      this.router.navigate(['/']); 
     }
   }
 }

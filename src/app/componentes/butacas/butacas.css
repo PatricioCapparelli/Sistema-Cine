@@ -1,29 +1,34 @@
-/* --- CONTENEDOR PRINCIPAL --- */
 .contenedor-sala {
+    --ancho-butaca: 35px;
+    --gap-butaca: 5px;
+    --ancho-pasillo: 40px;
+    --radio: 8px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     font-family: Arial, sans-serif;
+    color: var(--marron-oscuro);
 }
 
 .pantalla {
     width: 80%;
-    background-color: #444;
-    color: white;
-    text-align: center;
-    padding: 10px;
     margin-bottom: 40px;
-    border-radius: 4px;
+    padding: 10px;
+    background-color: var(--marron-oscuro);
+    color: var(--crema);
+    text-align: center;
     letter-spacing: 5px;
     font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(38, 11, 1, 0.25);
 }
 
 .grilla {
     display: flex;
     flex-direction: column;
-    gap: 10px; 
+    gap: 10px;
 }
 
 .fila-butacas {
@@ -36,81 +41,93 @@
     width: 30px;
     font-weight: bold;
     font-size: 1.2rem;
-    color: #333;
+    color: var(--marron-gris);
 }
 
 .bloque {
     display: flex;
-    gap: 5px; 
+    gap: var(--gap-butaca);
 }
 
 .pasillo {
-    width: 40px;
+    width: var(--ancho-pasillo);
 }
 
-
 .butaca {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px 8px 4px 4px; 
-    border: 1px solid #ccc;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    width: var(--ancho-butaca);
+    height: var(--ancho-butaca);
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    flex-shrink: 0;
+    border: 1px solid var(--beige);
+    border-radius: var(--radio) var(--radio) 4px 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.butaca:focus-visible {
+    outline: 2px solid var(--marron-claro);
+    outline-offset: 2px;
 }
 
 .butaca.libre {
-    background-color: #ffffff;
-    color: #333;
+    background-color: var(--crema);
+    color: var(--marron-oscuro);
 }
+
 .butaca.libre:hover {
-    background-color: #e0e0e0; 
+    background-color: var(--beige);
 }
 
 .butaca.seleccionada {
-    background-color: #a79428;
-    color: white;
-    border-color: #000000;
-    transform: scale(1.0); 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background-color: var(--marron-claro);
+    color: var(--crema);
+    border-color: var(--marron-oscuro);
+    box-shadow: 0 2px 4px rgba(38, 11, 1, 0.3);
 }
 
 .butaca.ocupada {
-    background-color: #6c757d;
-    color: #d3d3d3;
-    border-color: #545b62;
+    background-color: var(--marron-gris);
+    color: var(--crema);
+    border-color: var(--marron-gris);
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.5;
+}
+
+.butaca.accesible {
+    width: calc(var(--ancho-butaca) * 2 + var(--gap-butaca));
+    outline: 2px solid var(--estrellas);
+    outline-offset: 1px;
 }
 
 .resumen-compra {
-    margin-top: 30px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
     width: 100%;
     max-width: 400px;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: var(--crema);
+    border: 1px solid var(--beige);
+    border-radius: 8px;
+    text-align: center;
 }
 
 .btn-pagar {
-    background-color: #2200ff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    font-size: 1.1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
     width: 100%;
     margin-top: 15px;
+    padding: 12px 24px;
+    background-color: var(--marron-claro);
+    color: var(--crema);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
 }
 
 .btn-pagar:hover {
-    background-color: #0056b3;
+    background-color: var(--marron-oscuro);
 }

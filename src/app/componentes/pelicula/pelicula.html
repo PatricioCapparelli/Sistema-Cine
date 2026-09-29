@@ -42,7 +42,7 @@
                     @for (funcion of funcionesInput(); track funcion.idFuncion) {
                     <div class="horario-badge">
                         <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
-                        <button [routerLink]="['/ingresar', funcion.idFuncion]" class="btn-comprar">
+                        <button (click)="iniciarCompra(funcion)" class="btn-comprar">
                             Comprar
                         </button>
                     </div>

@@ -9,32 +9,40 @@ export class Auth {
     private supabaseS = inject(Supabase);
     private routerS = inject(Router);
     private s = this.supabaseS.Supabase
+
     public usuarioActual: WritableSignal<User | null> = signal<User | null>(null);
     public rolActual: WritableSignal<string | null> = signal<string | null>(null);
+    public perfilActual: WritableSignal<IUsuario | null> = signal<IUsuario | null>(null);
 
     constructor() {
         this.s.auth.onAuthStateChange(async (event, session) => {
-            if (session?.user) {
-                this.usuarioActual.set(session.user);
+            setTimeout(async () => {
+                if (session?.user) {
+                    this.usuarioActual.set(session.user);
 
-                const { data, error } = await this.supabaseS.Supabase
-                    .from('Usuarios')
-                    .select('rol')
-                    .eq('id', session.user.id)
-                    .maybeSingle();
+                    const { data, error } = await this.supabaseS.Supabase
+                        .from('Usuarios')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
 
-                if (!error && data) {
-                    this.rolActual.set(data.rol);
+                    if (!error && data) {
+                        this.rolActual.set(data.rol);
+                        this.perfilActual.set(data as IUsuario);
+                    } else {
+                        this.rolActual.set('cliente');
+                        this.perfilActual.set(null);
+                    }
                 } else {
-                    this.rolActual.set('cliente');
+                    this.usuarioActual.set(null);
+                    this.rolActual.set(null);
+                    this.perfilActual.set(null);
                 }
-
-            } else {
-                this.usuarioActual.set(null);
-                this.rolActual.set(null);
             }
+                , 0);
         });
     }
+
 
     public async registrar(usuario: IAuthData) {
         const respuesta = await this.s.auth.signUp({
@@ -64,7 +72,6 @@ export class Auth {
             if (dbError) throw dbError;
         }
 
-        this.routerS.navigateByUrl('/cartelera');
         return respuesta.data;
     }
 
@@ -76,7 +83,6 @@ export class Auth {
 
         if (error) throw error;
 
-        this.routerS.navigateByUrl('/cartelera');
         return data;
     }
 
@@ -90,7 +96,7 @@ export class Auth {
     async obtenerTodosLosUsuarios() {
         const { data, error } = await this.s.from('Usuarios')
             .select('id, apellido, nombre, rol')
-            .order('rol', { ascending: true }); 
+            .order('rol', { ascending: true });
 
         if (error) throw new Error('Error al cargar los usuarios');
         return data;
@@ -103,7 +109,7 @@ export class Auth {
 
         if (error) {
             console.error('Error de Supabase al cambiar rol:', error);
-            throw error; 
+            throw error;
         }
     }
 }

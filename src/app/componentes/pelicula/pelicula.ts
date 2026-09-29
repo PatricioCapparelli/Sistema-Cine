@@ -1,27 +1,32 @@
 import { Component, input, output, OnInit, inject, signal } from '@angular/core';
 import { IPelicula } from '../../core/interfaces/Pelicula';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormatoDuracionPipe } from '../../core/pipes/formato-duracion-pipe';
 import { FormsModule } from '@angular/forms';
 import { ResenasService } from '../../core/services/resenas.service';
-import { Auth } from '../../core/services/auth.service'; 
+import { Auth } from '../../core/services/auth.service';
+import { ReservaService } from '../../core/services/reserva.service';
+import { SesionCompraService } from '../../core/services/sesion-compra.service';
 
 @Component({
   selector: 'app-pelicula',
   standalone: true,
-  imports: [RouterLink, DatePipe, FormatoDuracionPipe, FormsModule],
+  imports: [DatePipe, FormatoDuracionPipe, FormsModule],
   styleUrl: './pelicula.css',
   templateUrl: './pelicula.html',
 })
 export class Pelicula implements OnInit {
   peliculaInput = input<IPelicula>();
   funcionesInput = input<any[]>([]);
-  modoAdmin = input<boolean>(false); 
-  eliminarOutput = output<number>(); 
+  modoAdmin = input<boolean>(false);
+  eliminarOutput = output<number>();
 
   private resenasService = inject(ResenasService);
-  public authService = inject(Auth); 
+  public authService = inject(Auth);
+  private sesionCompra = inject(SesionCompraService);
+  private reservaService = inject(ReservaService);
+  private router = inject(Router);
 
   modalAbierto = signal<boolean>(false);
   listaResenas = signal<any[]>([]);
@@ -49,14 +54,14 @@ export class Pelicula implements OnInit {
   async publicarResena() {
     const peli = this.peliculaInput();
     const comentario = this.nuevoComentario().trim();
-    
+
     if (!comentario) {
       alert('Por favor, escribí un comentario antes de enviar.');
       return;
     }
 
     const usuario = this.authService.usuarioActual();
-    
+
     if (!usuario) {
       alert('Error: Tenés que iniciar sesión para dejar una reseña.');
       return;
@@ -66,7 +71,7 @@ export class Pelicula implements OnInit {
       try {
         await this.resenasService.dejarResena(
           peli.id,
-          usuario.id, 
+          usuario.id,
           this.nuevaCalificacion(),
           comentario
         );
@@ -95,5 +100,63 @@ export class Pelicula implements OnInit {
     if (peli && peli.id) {
       this.eliminarOutput.emit(peli.id);
     }
+  }
+
+  calcularEdad(fechaNacimiento: string): number {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  }
+
+  iniciarCompra(funcion: any) {
+    console.log('usuario', this.authService.usuarioActual(), 'perfil', this.authService.perfilActual(), 'anonimo', this.sesionCompra.esAnonimo(), 'funcion', funcion);
+    const peli = this.peliculaInput();
+    const edadMinima = peli?.edad_minima || 0;
+
+    const usuarioDB = this.authService.perfilActual();
+    const esAnonimo = this.sesionCompra.esAnonimo();
+
+    const hayUsuarioRegistrado = !!this.authService.usuarioActual();
+
+    if (!hayUsuarioRegistrado && !esAnonimo) {
+      this.router.navigate(['/auth/login'], { queryParams: { funcionId: funcion.idFuncion, edadMinima } });
+      return;
+    }
+
+    if (edadMinima > 0) {
+
+      if (esAnonimo && !hayUsuarioRegistrado) {
+        alert(`Las películas +${edadMinima} no se pueden comprar como invitado. Redirigiendo al login...`);
+        this.router.navigate(['/auth/login'], { queryParams: { funcionId: funcion.idFuncion } });
+        return;
+      }
+
+      if (hayUsuarioRegistrado && usuarioDB?.fecha_nacimiento) {
+        const edadUsuario = this.calcularEdad(usuarioDB.fecha_nacimiento);
+        if (edadUsuario < edadMinima) {
+          alert(`Control de seguridad: Esta función requiere ser mayor de ${edadMinima} años.`);
+          return;
+        }
+      } else if (hayUsuarioRegistrado) {
+        alert("Necesitás configurar tu fecha de nacimiento en tu perfil para comprar esta entrada.");
+        return;
+      }
+    }
+
+    this.reservaService.idFuncionSeleccionada.set(funcion.idFuncion);
+    this.reservaService.detalleFuncion.set({
+      pelicula: peli?.nombre || 'Película',
+      horario: funcion.hora,
+      sala: funcion.nombreSala || 'Sala Asignada',
+      edadMinima: edadMinima
+    });
+
+    this.router.navigate(['/comprar', funcion.idFuncion]);
   }
 }

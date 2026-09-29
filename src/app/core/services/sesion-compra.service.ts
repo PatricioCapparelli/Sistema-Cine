@@ -19,7 +19,7 @@ export class SesionCompraService {
     private supabaseS = inject(Supabase);
     private s = this.supabaseS.Supabase;
 
-    esAnonimo = signal<boolean>(true);
+    esAnonimo = signal<boolean>(false);
     emailComprador = signal<string>('');
     datosUsuario = signal<any>(null);
 

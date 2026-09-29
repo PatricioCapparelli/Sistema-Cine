@@ -4,48 +4,26 @@
     <div class="grilla">
         @for (fila of matrizSala(); track $index) {
         <div class="fila-butacas">
-            <div class="letra-fila">{{ fila[0].fila }}</div>
-            
-            <div class="bloque">
-                @for (butaca of fila.slice(0, 4); track butaca.id) {
-                <button class="butaca" 
-                    [class.libre]="butaca.estado === 'libre'"
-                    [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" 
-                    (click)="seleccionarButaca(butaca)">
-                    {{ butaca.numero }}
-                </button>
-                }
-            </div>
+    <div class="letra-fila">{{ fila[0].tipo === 'accesible' ? '♿' : fila[0].fila }}</div>
 
-            <div class="pasillo"></div>
-
-            <div class="bloque">
-                @for (butaca of fila.slice(4, 24); track butaca.id) {
-                <button class="butaca" 
-                    [class.libre]="butaca.estado === 'libre'"
-                    [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" 
-                    (click)="seleccionarButaca(butaca)">
-                    {{ butaca.numero }}
-                </button>
-                }
-            </div>
-
-            <div class="pasillo"></div>
-
-            <div class="bloque">
-                @for (butaca of fila.slice(24, 28); track butaca.id) {
-                <button class="butaca" 
-                    [class.libre]="butaca.estado === 'libre'"
-                    [class.seleccionada]="butaca.estado === 'seleccionada'"
-                    [class.ocupada]="butaca.estado === 'ocupada'" 
-                    (click)="seleccionarButaca(butaca)">
-                    {{ butaca.numero }}
-                </button>
-                }
-            </div>
-        </div>
+    @for (seccion of seccionesDe(fila); track $index) {
+    <div class="bloque">
+        @for (butaca of seccion; track butaca.id) {
+        <button class="butaca"
+            [class.libre]="butaca.estado === 'libre'"
+            [class.seleccionada]="butaca.estado === 'seleccionada'"
+            [class.ocupada]="butaca.estado === 'ocupada'"
+            [class.accesible]="butaca.tipo === 'accesible'"
+            (click)="seleccionarButaca(butaca)">
+            {{ butaca.numero }}
+        </button>
+        }
+    </div>
+    @if (!$last) {
+    <div class="pasillo"></div>
+    }
+    }
+</div>
         }
     </div>
 

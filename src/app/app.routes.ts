@@ -38,10 +38,6 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/escaner-qr/escaner-qr').then(m => m.EscanerQrComponent) 
     },
     {
-        path: 'ingresar/:id',
-        loadComponent: () => import('./componentes/ingresar/ingresar').then(m => m.Ingresar)
-    },
-    {
         path: 'comprar/:id',
         canActivate: [compraGuard],
         loadComponent: () => import('./componentes/butacas/butacas').then(m => m.Butacas)

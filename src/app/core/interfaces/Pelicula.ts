@@ -6,4 +6,5 @@ export interface IPelicula {
     imagen_url: string;
     duracion_minutos: number;
     genero: string;
+    edad_minima: number;
 }
