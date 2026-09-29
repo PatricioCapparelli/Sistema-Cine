@@ -113,7 +113,7 @@ export class Candy implements OnInit {
         butacasIds,
         this.granTotal(),
         idTicketPrincipal,
-        codigoManualPrincipal 
+        codigoManualPrincipal
       );
 
       alert(`Compra exitosa! Se descargara tu comprobante.`);
@@ -125,8 +125,16 @@ export class Candy implements OnInit {
 
       this.router.navigate(['/cartelera']);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error procesando la compra final:', error);
+
+      if (error?.message === 'BUTACA_YA_VENDIDA') {
+        alert('Alguna de tus butacas acaba de ser comprada por otra persona. Volvé a elegir tus asientos.');
+        this.reservaService.butacasSeleccionadas.set([]);
+        this.router.navigate(['/comprar', idFunc]);
+        return;
+      }
+
       alert('Hubo un error al procesar tu compra. Revisa la consola.');
     } finally {
       this.loadingService.ocultar();

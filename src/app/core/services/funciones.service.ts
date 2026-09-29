@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { Supabase } from './supabase.service';
 import { IFuncion } from '../interfaces/Funcion';
 import { Venta } from '../interfaces/Venta';
@@ -10,59 +11,70 @@ export class FuncionesService {
     private supabase = inject(Supabase);
     private s = this.supabase.Supabase;
 
+    private readonly MARGEN_MINUTOS = 30;
+
+    private calcularFin(inicio: Date, duracionMinutos: number): Date {
+        return new Date(inicio.getTime() + (duracionMinutos + this.MARGEN_MINUTOS) * 60000);
+    }
+
+    private haySolapamiento(inicioA: Date, finA: Date, inicioB: Date, finB: Date): boolean {
+        return inicioA < finB && inicioB < finA;
+    }
+
+    private async obtenerDuracion(peliculaId: string | number): Promise<number> {
+        const { data, error } = await this.s.from('Peliculas')
+            .select('duracion_minutos')
+            .eq('id', peliculaId)
+            .single();
+
+        if (error || !data) throw new Error('Error al obtener datos de la pelicula');
+        return data.duracion_minutos;
+    }
+
+    private async salaTieneConflicto(salaId: string | number, inicio: Date, fin: Date): Promise<boolean> {
+        const { data, error } = await this.s.from('Funciones')
+            .select('fecha_hora_inicio, Peliculas(duracion_minutos)')
+            .eq('sala_id', salaId);
+
+        if (error) throw new Error('Error al obtener las funciones de la sala');
+
+        return (data || []).some(func => {
+            const inicioExistente = new Date(func.fecha_hora_inicio);
+            const finExistente = this.calcularFin(inicioExistente, (func.Peliculas as any).duracion_minutos);
+            return this.haySolapamiento(inicio, fin, inicioExistente, finExistente);
+        });
+    }
+
     async obtenerFunciones(ahora: string) {
-        const { data: funciones, error } = await this.s.from('Funciones').select(`
+        const { data, error } = await this.s.from('Funciones').select(`
             id, fecha_hora_inicio, formato_visual, formato_audio,
             Peliculas (*), Salas (nombre)
         `).gte('fecha_hora_inicio', ahora).order('fecha_hora_inicio', { ascending: true });
 
         if (error) throw error;
-        return funciones;
+        return data;
     }
 
     async guardarFuncion(nuevaFuncion: IFuncion): Promise<void> {
-        const inicioNueva = new Date(nuevaFuncion.fecha_hora_inicio);
-        
-        const { data: peliData, error: errPeli } = await this.s.from('Peliculas')
-            .select('duracion_minutos')
-            .eq('id', nuevaFuncion.pelicula_id)
-            .single();
-            
-        if (errPeli) throw new Error('Error al obtener datos de la película');
+        const inicio = new Date(nuevaFuncion.fecha_hora_inicio);
+        const duracion = await this.obtenerDuracion(nuevaFuncion.pelicula_id);
+        const fin = this.calcularFin(inicio, duracion);
 
-        const duracionNuevaPeli = peliData.duracion_minutos;
-        const finNueva = new Date(inicioNueva.getTime() + (duracionNuevaPeli + 30) * 60000);
-
-        const { data: funcionesExistentes, error: errFunciones } = await this.s.from('Funciones')
-            .select('fecha_hora_inicio, Peliculas(duracion_minutos)')
-            .eq('sala_id', nuevaFuncion.sala_id);
-            
-        if (errFunciones) throw new Error('Error al obtener las funciones de la sala');
-
-        if (funcionesExistentes) {
-            for (const func of funcionesExistentes) {
-                const inicioExistente = new Date(func.fecha_hora_inicio);
-                const duracionExistente = (func.Peliculas as any).duracion_minutos;
-                const finExistente = new Date(inicioExistente.getTime() + (duracionExistente + 30) * 60000);
-
-                if (inicioNueva < finExistente && inicioExistente < finNueva) {
-                    throw new Error('CONFLICTO_HORARIO');
-                }
-            }
+        if (await this.salaTieneConflicto(nuevaFuncion.sala_id, inicio, fin)) {
+            throw new Error('CONFLICTO_HORARIO');
         }
 
-        const { error: errInsert } = await this.s.from('Funciones').insert([nuevaFuncion]);
-        if (errInsert) throw new Error('Error al insertar la función');
+        const { error } = await this.s.from('Funciones').insert([nuevaFuncion]);
+        if (error) throw new Error('Error al insertar la función');
     }
 
-    async programarFuncionesAutomaticas(peliculaId: string, horariosSolicitados: string[], formatoVisual: string, formatoAudio: string): Promise<void> {
-        const { data: peliData, error: errPeli } = await this.s.from('Peliculas')
-            .select('duracion_minutos')
-            .eq('id', peliculaId)
-            .single();
-
-        if (errPeli || !peliData) throw new Error('Error al obtener datos de la pelicula');
-        const duracion = peliData.duracion_minutos;
+    async programarFuncionesAutomaticas(
+        peliculaId: string,
+        horariosSolicitados: string[],
+        formatoVisual: string,
+        formatoAudio: string
+    ): Promise<void> {
+        const duracion = await this.obtenerDuracion(peliculaId);
 
         const { data: salas, error: errSalas } = await this.s.from('Salas').select('id, nombre');
         if (errSalas || !salas) throw new Error('Error al obtener las salas del sistema');
@@ -70,59 +82,38 @@ export class FuncionesService {
         const funcionesAInsertar: any[] = [];
         const reportesError: string[] = [];
 
-        for (const horarioStr of horariosSolicitados) {
-            const inicioNuevo = new Date(horarioStr);
-            const finNuevo = new Date(inicioNuevo.getTime() + (duracion + 30) * 60000);
+        for (const horario of horariosSolicitados) {
+            const inicio = new Date(horario);
+            const fin = this.calcularFin(inicio, duracion);
 
-            let salaAsignada = null;
+            let salaAsignada: string | number | null = null;
 
             for (const sala of salas) {
-                const { data: funcionesSala } = await this.s.from('Funciones')
-                    .select('fecha_hora_inicio, Peliculas(duracion_minutos)')
-                    .eq('sala_id', sala.id);
-
-                let hayConflicto = false;
-
-                if (funcionesSala) {
-                    for (const func of funcionesSala) {
-                        const inicioExistente = new Date(func.fecha_hora_inicio);
-                        const duracionExistente = (func.Peliculas as any).duracion_minutos;
-                        const finExistente = new Date(inicioExistente.getTime() + (duracionExistente + 30) * 60000);
-
-                        if (inicioNuevo < finExistente && inicioExistente < finNuevo) {
-                            hayConflicto = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!hayConflicto) {
-                    const colisionMemoria = funcionesAInsertar.some(f => {
-                        if (f.sala_id !== sala.id) return false;
-                        const inicioMem = new Date(f.fecha_hora_inicio);
-                        const finMem = new Date(inicioMem.getTime() + (duracion + 30) * 60000);
-                        return inicioNuevo < finMem && inicioMem < finNuevo;
-                    });
-                    if (colisionMemoria) hayConflicto = true;
-                }
-
-                if (!hayConflicto) {
-                    salaAsignada = sala.id;
-                    break;
-                }
-            }
-
-            if (salaAsignada) {
-                funcionesAInsertar.push({
-                    pelicula_id: peliculaId,
-                    sala_id: salaAsignada,
-                    fecha_hora_inicio: horarioStr,
-                    formato_visual: formatoVisual,
-                    formato_audio: formatoAudio
+                const colisionPendiente = funcionesAInsertar.some(f => {
+                    if (f.sala_id !== sala.id) return false;
+                    const inicioPendiente = new Date(f.fecha_hora_inicio);
+                    return this.haySolapamiento(inicio, fin, inicioPendiente, this.calcularFin(inicioPendiente, duracion));
                 });
-            } else {
-                reportesError.push(`No hay salas físicas disponibles para el horario: ${inicioNuevo.toLocaleString()}`);
+
+                if (colisionPendiente) continue;
+                if (await this.salaTieneConflicto(sala.id, inicio, fin)) continue;
+
+                salaAsignada = sala.id;
+                break;
             }
+
+            if (salaAsignada === null) {
+                reportesError.push(`No hay salas físicas disponibles para el horario: ${inicio.toLocaleString()}`);
+                continue;
+            }
+
+            funcionesAInsertar.push({
+                pelicula_id: peliculaId,
+                sala_id: salaAsignada,
+                fecha_hora_inicio: horario,
+                formato_visual: formatoVisual,
+                formato_audio: formatoAudio
+            });
         }
 
         if (reportesError.length > 0) {
@@ -130,8 +121,8 @@ export class FuncionesService {
         }
 
         if (funcionesAInsertar.length > 0) {
-            const { error: errInsert } = await this.s.from('Funciones').insert(funcionesAInsertar);
-            if (errInsert) throw new Error('Error crítico al guardar la programación automática.');
+            const { error } = await this.s.from('Funciones').insert(funcionesAInsertar);
+            if (error) throw new Error('Error crítico al guardar la programación automática.');
         }
     }
 
@@ -145,7 +136,7 @@ export class FuncionesService {
             .select('fecha_hora_inicio, Peliculas(nombre, edad_minima), Salas(nombre)')
             .eq('id', id)
             .single();
-            
+
         if (error) throw new Error('Error al obtener el detalle de la función');
         return data;
     }
@@ -154,9 +145,24 @@ export class FuncionesService {
         const { data, error } = await this.s.from('Ventas')
             .select('butaca_id')
             .eq('funcion_id', funcionId);
-            
+
         if (error) throw new Error('Error al obtener las butacas ocupadas');
         return data || [];
+    }
+
+    suscribirseAVentas(funcionId: string, alNuevaVenta: (butacaId: string) => void): RealtimeChannel {
+        return this.s
+            .channel(`ventas-funcion-${funcionId}`)
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'Ventas', filter: `funcion_id=eq.${funcionId}` },
+                (payload) => alNuevaVenta((payload.new as any).butaca_id)
+            )
+            .subscribe();
+    }
+
+    quitarSuscripcion(canal: RealtimeChannel): void {
+        this.s.removeChannel(canal);
     }
 
     async registrarVentas(ventas: Venta[]) {
@@ -164,6 +170,9 @@ export class FuncionesService {
 
         if (error) {
             console.error('Error de Supabase al insertar Venta:', error);
+            if (error.code === '23505') {
+                throw new Error('BUTACA_YA_VENDIDA');
+            }
             throw new Error('Error al registrar la venta');
         }
 
@@ -177,16 +186,14 @@ export class FuncionesService {
         let query = this.s.from('Ventas')
             .select('id, entrada_usada, butaca_id, codigo_manual, Funciones(Peliculas(nombre))');
 
-        if (esUUID) {
-            query = query.eq('id', codigoLimpio);
-        } else {
-            query = query.eq('codigo_manual', codigoLimpio).limit(1);
-        }
+        query = esUUID
+            ? query.eq('id', codigoLimpio)
+            : query.eq('codigo_manual', codigoLimpio).limit(1);
 
         const { data: ticket, error: ticketError } = await query.maybeSingle();
 
         if (ticketError) {
-            console.error("Error BD Escaner:", ticketError);
+            console.error('Error BD Escaner:', ticketError);
             throw new Error(`Falla tecnica BD: ${ticketError.message}`);
         }
 
@@ -210,11 +217,9 @@ export class FuncionesService {
             .select('cantidad, Productos_Candy(nombre)')
             .eq('id_ticket', ticket.id);
 
-        const nombrePeli = (ticket.Funciones as any)?.Peliculas?.nombre || 'Pelicula desconocida';
-
         return {
             mensaje: `Ticket Valido. Pase a Butaca ${ticket.butaca_id}`,
-            pelicula: nombrePeli,
+            pelicula: (ticket.Funciones as any)?.Peliculas?.nombre || 'Pelicula desconocida',
             candy: candy || []
         };
     }
