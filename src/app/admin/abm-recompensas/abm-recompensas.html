@@ -1,0 +1,49 @@
+<div class="admin-container">
+    <h2>Recompensas del Programa de Puntos</h2>
+    <p>1 peso gastado = 1 punto. Definí cuántos puntos cuesta cada recompensa.</p>
+
+    <form [formGroup]="formulario" (ngSubmit)="crear()" class="formulario-admin">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Pochoclo grande">
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" formControlName="tipo">
+                <option value="entrada">Entrada gratis</option>
+                <option value="candy">Producto del candy bar</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="costo_puntos">Costo en puntos:</label>
+            <input type="number" id="costo_puntos" min="1" formControlName="costo_puntos">
+        </div>
+
+        <button type="submit" [disabled]="formulario.invalid" class="btn-guardar">Agregar recompensa</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr><th>Recompensa</th><th>Tipo</th><th>Puntos</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+            @for (r of recompensas(); track r.id) {
+            <tr>
+                <td>{{ r.nombre }}</td>
+                <td>{{ r.tipo === 'entrada' ? 'Entrada' : 'Candy' }}</td>
+                <td>
+                    <input type="number" min="1" [value]="r.costo_puntos"
+                        (change)="cambiarCosto(r, $any($event.target).value)">
+                </td>
+                <td>
+                    <button type="button" (click)="alternarActiva(r)">
+                        {{ r.activa ? 'Desactivar' : 'Activar' }}
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

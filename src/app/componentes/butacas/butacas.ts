@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed, effect, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { FuncionesService } from '../../core/services/funciones.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { Auth } from '../../core/services/auth.service';
+import { SalaEnVivoService } from '../../core/services/sala-en-vivo.service';
 import { Butaca } from '../../core/interfaces/Butaca';
 
 @Component({
@@ -20,13 +21,15 @@ export class Butacas implements OnInit, OnDestroy {
   private reservaService = inject(ReservaService);
   private sesionCompra = inject(SesionCompraService);
   private authService = inject(Auth);
-
-  private canalVentas: RealtimeChannel | null = null;
+  private salaEnVivo = inject(SalaEnVivoService);
 
   private readonly FILAS_LETRAS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'ACC', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
   private readonly FILA_ACCESIBLE = 'ACC';
   private readonly SECCIONES_ACCESIBLES = [2, 10, 2];
   private readonly COLUMNAS = 28;
+
+  private canalVentas: RealtimeChannel | null = null;
+  private yendoACandy = false;
 
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
@@ -34,6 +37,13 @@ export class Butacas implements OnInit, OnDestroy {
   detalleFuncion = signal<{ pelicula: string; horario: string; sala: string; edadMinima: number; } | null>(null);
 
   cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
+
+  constructor() {
+    effect(() => {
+      const bloqueadas = this.salaEnVivo.bloqueadas();
+      untracked(() => this.aplicarBloqueadas(bloqueadas));
+    });
+  }
 
   async ngOnInit() {
     this.idFuncion.set(this.route.snapshot.paramMap.get('id'));
@@ -46,15 +56,16 @@ export class Butacas implements OnInit, OnDestroy {
     const id = this.idFuncion();
     if (id) {
       this.canalVentas = this.funcionesService.suscribirseAVentas(id, (butacaId) => this.marcarOcupada(butacaId));
+      this.salaEnVivo.conectar(id);
+      this.publicarSeleccion();
     }
 
     await this.cargarButacasOcupadas();
   }
 
   ngOnDestroy() {
-    if (this.canalVentas) {
-      this.funcionesService.quitarSuscripcion(this.canalVentas);
-    }
+    if (this.canalVentas) this.funcionesService.quitarSuscripcion(this.canalVentas);
+    if (!this.yendoACandy) this.salaEnVivo.desconectar();
   }
 
   seccionesDe(fila: Butaca[]): Butaca[][] {
@@ -63,9 +74,9 @@ export class Butacas implements OnInit, OnDestroy {
   }
 
   seleccionarButaca(butaca: Butaca) {
-    if (butaca.estado === 'ocupada') return;
+    if (butaca.estado === 'ocupada' || butaca.estado === 'bloqueada') return;
 
-    const nuevoEstado = butaca.estado === 'libre' ? 'seleccionada' : 'libre';
+    const nuevoEstado: Butaca['estado'] = butaca.estado === 'libre' ? 'seleccionada' : 'libre';
 
     this.actualizarEstadoButaca(butaca.id, nuevoEstado);
 
@@ -74,6 +85,8 @@ export class Butacas implements OnInit, OnDestroy {
         ? [...actuales, { ...butaca, estado: nuevoEstado }]
         : actuales.filter(b => b.id !== butaca.id)
     );
+
+    this.publicarSeleccion();
   }
 
   continuarACandy() {
@@ -93,7 +106,12 @@ export class Butacas implements OnInit, OnDestroy {
     this.reservaService.detalleFuncion.set(this.detalleFuncion());
     this.reservaService.butacasSeleccionadas.set(this.butacasSeleccionadas());
 
+    this.yendoACandy = true;
     this.router.navigate(['/candy']);
+  }
+
+  private publicarSeleccion() {
+    this.salaEnVivo.publicar(this.butacasSeleccionadas().map(b => b.id));
   }
 
   private actualizarEstadoButaca(butacaId: string, estado: Butaca['estado']) {
@@ -109,6 +127,19 @@ export class Butacas implements OnInit, OnDestroy {
       this.butacasSeleccionadas.update(actuales => actuales.filter(b => b.id !== butacaId));
       alert(`La butaca ${butacaId} acaba de ser comprada por otra persona. Elegí otra.`);
     }
+
+    this.publicarSeleccion();
+  }
+
+  private aplicarBloqueadas(bloqueadas: Set<string>) {
+    this.matrizSala.update(matriz =>
+      matriz.map(fila =>
+        fila.map((b): Butaca => {
+          if (b.estado === 'ocupada' || b.estado === 'seleccionada') return b;
+          return { ...b, estado: bloqueadas.has(b.id) ? 'bloqueada' : 'libre' };
+        })
+      )
+    );
   }
 
   private validarAcceso(): boolean {

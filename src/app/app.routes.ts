@@ -19,23 +19,38 @@ export const routes: Routes = [
     },
     {
         path: 'admin/promociones',
-        canActivate: [logueadoGuard, adminGuard], 
+        canActivate: [logueadoGuard, adminGuard],
         loadComponent: () => import('./admin/abm-promociones/abm-promociones').then(m => m.AbmPromocionesComponent)
     },
     {
+        path: 'admin/reporte',
+        canActivate: [logueadoGuard, adminGuard],
+        loadComponent: () => import('./admin/reporte-facturacion/reporte-facturacion').then(m => m.ReporteFacturacionComponent)
+    },
+    {
+        path: 'admin/recompensas',
+        canActivate: [logueadoGuard, adminGuard],
+        loadComponent: () => import('./admin/abm-recompensas/abm-recompensas').then(m => m.AbmRecompensasComponent)
+    },
+    {
         path: 'admin/candy',
-        canActivate: [logueadoGuard, adminGuard], 
+        canActivate: [logueadoGuard, adminGuard],
         loadComponent: () => import('./admin/abm-candy/abm-candy').then(m => m.AbmCandyComponent)
     },
     {
         path: 'admin/usuarios',
-        canActivate: [logueadoGuard, adminGuard], 
+        canActivate: [logueadoGuard, adminGuard],
         loadComponent: () => import('./admin/abm-usuarios/abm-usuarios').then(m => m.AbmUsuariosComponent)
     },
     {
+        path: 'mis-puntos',
+        canActivate: [logueadoGuard],
+        loadComponent: () => import('./componentes/mis-puntos/mis-puntos').then(m => m.MisPuntosComponent)
+    },
+    {
         path: 'escaner',
-        canActivate: [logueadoGuard, empleadoGuard], 
-        loadComponent: () => import('./componentes/escaner-qr/escaner-qr').then(m => m.EscanerQrComponent) 
+        canActivate: [logueadoGuard, empleadoGuard],
+        loadComponent: () => import('./componentes/escaner-qr/escaner-qr').then(m => m.EscanerQrComponent)
     },
     {
         path: 'comprar/:id',

@@ -155,10 +155,16 @@ export class FuncionesService {
             .channel(`ventas-funcion-${funcionId}`)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'Ventas', filter: `funcion_id=eq.${funcionId}` },
-                (payload) => alNuevaVenta((payload.new as any).butaca_id)
+                { event: 'INSERT', schema: 'public', table: 'Ventas' },
+                (payload) => {
+                    console.log('realtime venta', payload);
+                    const nueva = payload.new as any;
+                    if (String(nueva.funcion_id) === String(funcionId)) {
+                        alNuevaVenta(nueva.butaca_id);
+                    }
+                }
             )
-            .subscribe();
+            .subscribe((status, err) => console.log('realtime estado:', status, err));
     }
 
     quitarSuscripcion(canal: RealtimeChannel): void {

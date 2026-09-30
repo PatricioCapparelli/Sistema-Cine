@@ -14,6 +14,7 @@
             [class.seleccionada]="butaca.estado === 'seleccionada'"
             [class.ocupada]="butaca.estado === 'ocupada'"
             [class.accesible]="butaca.tipo === 'accesible'"
+            [class.bloqueada]="butaca.estado === 'bloqueada'"
             (click)="seleccionarButaca(butaca)">
             {{ butaca.numero }}
         </button>

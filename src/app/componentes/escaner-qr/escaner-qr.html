@@ -1,9 +1,21 @@
 <div class="escaner-container">
     <h2>Control de Acceso</h2>
+    
+    <!-- Selector de modo -->
+    <div class="modo-selector" style="margin-bottom: 20px; display: flex; gap: 20px; justify-content: center;">
+        <label style="cursor: pointer;">
+            <input type="radio" name="modo" [checked]="modoEscaneo === 'ticket'" (change)="modoEscaneo = 'ticket'">
+            🎟️ Entrada / Candy
+        </label>
+        <label style="cursor: pointer;">
+            <input type="radio" name="modo" [checked]="modoEscaneo === 'canje'" (change)="modoEscaneo = 'canje'">
+            🎁 Canje de Puntos
+        </label>
+    </div>
+
     <p>Escaneá el código QR del cliente.</p>
 
     <div class="camara-wrapper">
-        <!-- Un solo escáner con todos sus eventos -->
         <zxing-scanner 
             [enable]="escaneando" 
             (scanSuccess)="procesarQR($event)"
@@ -12,7 +24,7 @@
     </div>
 
     <div class="ingreso-manual">
-        <p>¿No funciona el lector? Ingresá el código corto de 6 caracteres.</p>
+        <p>¿No funciona el lector? Ingresá el código corto.</p>
         <div class="input-grupo">
             <input type="text" #codigoManual placeholder="Ej: A7B9X2" maxlength="6" style="text-transform: uppercase;">
             <button class="btn-guardar" (click)="procesarQR(codigoManual.value)">
@@ -24,7 +36,7 @@
     @if (mensajeResultado) {
         <div class="resultado-box" [ngClass]="claseResultado">
             <h3>{{ mensajeResultado }}</h3>
-
+            
             @if (candyResultados.length > 0) {
                 <div class="candy-alerta">
                     <h4>🍿 ATENCION: Entregar Combo:</h4>
@@ -33,6 +45,15 @@
                             <li>{{ item.cantidad }}x {{ item.Productos_Candy.nombre }}</li>
                         }
                     </ul>
+                </div>
+            }
+
+            @if (recompensaCanje) {
+                <div class="candy-alerta" style="background-color: #ffe0b2; color: #e65100; padding: 10px; border-radius: 8px;">
+                    <h4>🎁 PREMIO DE FIDELIDAD:</h4>
+                    <p style="font-size: 1.2rem; font-weight: bold; margin: 10px 0;">
+                        Entregar: {{ recompensaCanje }}
+                    </p>
                 </div>
             }
         </div>

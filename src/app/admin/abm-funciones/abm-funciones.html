@@ -16,8 +16,32 @@
         </div>
 
         <div class="form-group">
-            <label for="fecha_hora_inicio">Fecha y Hora de Inicio:</label>
-            <input type="datetime-local" id="fecha_hora_inicio" formControlName="fecha_hora_inicio">
+            <label>Día:</label>
+            <div class="chips">
+                @for (dia of dias; track dia.valor) {
+                <button type="button" class="chip"
+                    [class.activo]="diaSeleccionado() === dia.valor"
+                    (click)="diaSeleccionado.set(dia.valor)">
+                    {{ dia.etiqueta }}
+                </button>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Horarios (podés marcar varios):</label>
+            <div class="chips">
+                @for (hora of horariosDisponibles(); track hora) {
+                <button type="button" class="chip"
+                    [class.activo]="horariosSeleccionados().includes(hora)"
+                    [disabled]="horarioPasado(hora)"
+                    (click)="alternarHorario(hora)">
+                    {{ hora }}
+                </button>
+                }
+                <input type="time" class="chip-hora" #otraHora
+                    (change)="agregarHorario(otraHora.value); otraHora.value = ''">
+            </div>
         </div>
 
         <div class="form-group">
@@ -40,7 +64,7 @@
             </select>
         </div>
 
-        <button type="submit" [disabled]="formulario.invalid" class="btn-guardar">
+        <button type="submit" [disabled]="!puedeGuardar()" class="btn-guardar">
             Programar Función
         </button>
 

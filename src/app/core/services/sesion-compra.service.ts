@@ -1,22 +1,13 @@
-import { Service, inject, signal } from '@angular/core';
+import { Service, inject, signal, effect } from '@angular/core';
 import { PromocionesService } from './promociones.service';
 import { Supabase } from './supabase.service';
+import { Auth } from '../../core/services/auth.service'; // Ajustá la ruta según tu estructura
+
 @Service()
 export class SesionCompraService {
-
-    constructor() {
-        const usuarioGuardado = localStorage.getItem('usuarioCine');
-        if (usuarioGuardado) {
-            const usuario = JSON.parse(usuarioGuardado);
-            this.esAnonimo.set(false);
-            this.emailComprador.set(usuario.email);
-            this.datosUsuario.set(usuario);
-            this.evaluarDescuentos(usuario);
-        }
-    }
-
     private promocionesService = inject(PromocionesService);
     private supabaseS = inject(Supabase);
+    private authS = inject(Auth);
     private s = this.supabaseS.Supabase;
 
     esAnonimo = signal<boolean>(false);
@@ -25,6 +16,26 @@ export class SesionCompraService {
 
     precioBaseEntrada = 5000;
     descuentoAplicado = signal<number>(0);
+
+    constructor() {
+        // El effect se ejecuta automáticamente cuando las señales de Auth cambian
+        effect(() => {
+            const perfil = this.authS.perfilActual();
+            const usuarioAuth = this.authS.usuarioActual();
+
+            if (perfil && usuarioAuth) {
+                // Combinamos el perfil con el email de auth porque evaluarDescuentos y la vista lo requieren
+                const usuarioCompleto = { ...perfil, email: usuarioAuth.email };
+                this.iniciarComoRegistrado(usuarioCompleto);
+            } else if (!this.esAnonimo()) {
+                // Limpieza en caso de cierre de sesión
+                this.datosUsuario.set(null);
+                this.emailComprador.set('');
+                this.descuentoAplicado.set(0);
+            }
+        }, { allowSignalWrites: true }); 
+
+    }
 
     iniciarComoAnonimo(email: string) {
         this.esAnonimo.set(true);

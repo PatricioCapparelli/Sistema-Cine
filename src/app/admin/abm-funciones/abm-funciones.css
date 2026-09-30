@@ -1,0 +1,39 @@
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 8px 14px;
+    background-color: var(--crema);
+    color: var(--marron-oscuro);
+    border: 1px solid var(--beige);
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.chip:hover:not(:disabled) {
+    background-color: var(--beige);
+}
+
+.chip.activo {
+    background-color: var(--marron-claro);
+    color: var(--crema);
+    border-color: var(--marron-oscuro);
+}
+
+.chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.chip-hora {
+    padding: 6px 10px;
+    border: 1px dashed var(--marron-gris);
+    border-radius: 20px;
+    background-color: transparent;
+    color: var(--marron-oscuro);
+}

@@ -1,0 +1,53 @@
+<div class="reporte-container">
+    <h2>Reporte de Facturación</h2>
+
+    <div class="chips">
+        @for (rango of RANGOS; track rango.dias) {
+        <button type="button" class="chip"
+            [class.activo]="rangoActivo() === rango.dias"
+            (click)="cargar(rango.dias)">
+            {{ rango.etiqueta }}
+        </button>
+        }
+    </div>
+
+    <div class="resumen">
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Facturado</span>
+            <strong>{{ moneda(totalFacturado()) }}</strong>
+        </div>
+        <div class="tarjeta">
+            <span class="tarjeta-titulo">Entradas vendidas</span>
+            <strong>{{ totalEntradas() }}</strong>
+        </div>
+    </div>
+
+    @if (cargando()) {
+    <p>Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje-error">No se pudo generar el reporte. Intentá de nuevo.</p>
+    } @else if (filas().length === 0) {
+    <p>No hay ventas en este período.</p>
+    } @else {
+    <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Día</th>
+                    <th>Entradas</th>
+                    <th>Facturado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (fila of filas(); track fila.dia) {
+                <tr>
+                    <td>{{ fechaLegible(fila.dia) }}</td>
+                    <td>{{ fila.entradas }}</td>
+                    <td>{{ moneda(fila.facturado) }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

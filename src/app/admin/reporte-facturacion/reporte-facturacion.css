@@ -1,0 +1,90 @@
+.reporte-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--marron-oscuro);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.chip {
+    padding: 8px 14px;
+    background-color: var(--crema);
+    color: var(--marron-oscuro);
+    border: 1px solid var(--beige);
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.chip:hover {
+    background-color: var(--beige);
+}
+
+.chip.activo {
+    background-color: var(--marron-claro);
+    color: var(--crema);
+    border-color: var(--marron-oscuro);
+}
+
+.resumen {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.tarjeta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    background-color: var(--crema);
+    border: 1px solid var(--beige);
+    border-radius: 8px;
+}
+
+.tarjeta-titulo {
+    color: var(--marron-gris);
+    font-size: 0.9rem;
+}
+
+.tarjeta strong {
+    font-size: 1.6rem;
+}
+
+.tabla-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 10px;
+    background-color: var(--marron-oscuro);
+    color: var(--crema);
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid var(--beige);
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--crema);
+}
+
+.mensaje-error {
+    color: var(--marron-claro);
+    font-weight: bold;
+}

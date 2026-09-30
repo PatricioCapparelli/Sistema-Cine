@@ -1,6 +1,6 @@
 <div class="auth-container">
     <h2>Registro de Usuario</h2>
-    
+
     <form [formGroup]="registroForm" (ngSubmit)="registrar()">
         <div class="form-group">
             <label for="email">Email:</label>
@@ -23,42 +23,66 @@
         </div>
 
         <div class="form-group">
-            <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-            <input type="date" id="fecha_nacimiento" formControlName="fecha_nacimiento">
+            <label>Fecha de Nacimiento:</label>
+            <div class="fecha-campos">
+                <input type="text" inputmode="numeric" maxlength="2" placeholder="Día"
+                    class="campo-corto" [value]="dia()" (input)="actualizarDia($event)">
+                <input type="text" inputmode="numeric" maxlength="4" placeholder="Año"
+                    class="campo-medio" [value]="anio()" (input)="actualizarAnio($event)">
+            </div>
+            <div class="chips chips-meses">
+                @for (nombre of MESES; track nombre; let i = $index) {
+                <button type="button" class="chip"
+                    [class.activo]="mes() === i + 1"
+                    (click)="elegirMes(i + 1)">
+                    {{ nombre }}
+                </button>
+                }
+            </div>
+            @if (fechaInvalida()) {
+            <p class="error-fecha">La fecha no es válida.</p>
+            }
         </div>
 
         <div class="form-group">
-            <label for="tipo_sangre">Tipo de Sangre:</label>
-            <select id="tipo_sangre" formControlName="tipo_sangre">
-                <option value="" disabled selected>Seleccioná un tipo</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-            </select>
+            <label>Tipo de Sangre:</label>
+            <div class="chips">
+                @for (tipo of TIPOS_SANGRE; track tipo) {
+                <button type="button" class="chip"
+                    [class.activo]="registroForm.controls.tipo_sangre.value === tipo"
+                    (click)="elegir('tipo_sangre', tipo)">
+                    {{ tipo }}
+                </button>
+                }
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="color_ojos">Color de Ojos:</label>
-            <select id="color_ojos" formControlName="color_ojos">
-                <option value="" disabled selected>Selecciona un color</option>
-                <option value="Marrón">Marrón</option>
-                <option value="Azul">Azul</option>
-                <option value="Verde">Verde</option>
-                <option value="Miel/Avellana">Miel/Avellana</option>
-                <option value="Gris">Gris</option>
-                <option value="Negro">Negro</option>
-                <option value="Otro">Otro</option>
-            </select>
+            <label>Color de Ojos:</label>
+            <div class="chips">
+                @for (color of COLORES_OJOS; track color) {
+                <button type="button" class="chip"
+                    [class.activo]="registroForm.controls.color_ojos.value === color"
+                    (click)="elegir('color_ojos', color)">
+                    {{ color }}
+                </button>
+                }
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="dias_vacaciones">Dias de Vacaciones por Año:</label>
-            <input type="number" id="dias_vacaciones" formControlName="dias_vacaciones">
+            <label>Dias de Vacaciones por Año:</label>
+            <div class="chips">
+                @for (dias of DIAS_VACACIONES; track dias) {
+                <button type="button" class="chip"
+                    [class.activo]="registroForm.controls.dias_vacaciones.value === dias"
+                    (click)="elegir('dias_vacaciones', dias)">
+                    {{ dias }}
+                </button>
+                }
+                <input type="number" min="0" class="campo-corto" placeholder="Otro"
+                    formControlName="dias_vacaciones">
+            </div>
         </div>
 
         <button type="submit" [disabled]="registroForm.invalid">

@@ -1,0 +1,24 @@
+<div class="puntos-container">
+    <h2>Mis Puntos</h2>
+    <p class="saldo"><strong>{{ saldo() }}</strong> puntos</p>
+
+    <h3>Recompensas</h3>
+    @for (r of recompensas(); track r.id) {
+    <div class="recompensa">
+        <span>{{ r.nombre }} — {{ r.costo_puntos }} pts</span>
+        <button type="button" [disabled]="saldo() < r.costo_puntos" (click)="canjear(r)">Canjear</button>
+    </div>
+    } @empty {
+    <p>Todavía no hay recompensas disponibles.</p>
+    }
+
+    <h3>Historial de canjes</h3>
+    @for (c of canjes(); track c.id) {
+    <div class="recompensa">
+        <span>{{ c.nombre_recompensa }} — {{ c.puntos_gastados }} pts — código <strong>{{ c.codigo }}</strong> ({{ c.estado }})</span>
+        <small>{{ c.created_at | date: 'dd/MM/yyyy HH:mm' }}</small>
+    </div>
+    } @empty {
+    <p>Todavía no hiciste canjes.</p>
+    }
+</div>

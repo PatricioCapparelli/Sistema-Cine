@@ -1,0 +1,49 @@
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chips-meses {
+    margin-top: 8px;
+}
+
+.chip {
+    padding: 8px 14px;
+    background-color: var(--crema);
+    color: var(--marron-oscuro);
+    border: 1px solid var(--beige);
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.chip:hover {
+    background-color: var(--beige);
+}
+
+.chip.activo {
+    background-color: var(--marron-claro);
+    color: var(--crema);
+    border-color: var(--marron-oscuro);
+}
+
+.fecha-campos {
+    display: flex;
+    gap: 8px;
+}
+
+.campo-corto {
+    width: 80px;
+}
+
+.campo-medio {
+    width: 110px;
+}
+
+.error-fecha {
+    margin-top: 6px;
+    color: var(--marron-claro);
+    font-weight: bold;
+}

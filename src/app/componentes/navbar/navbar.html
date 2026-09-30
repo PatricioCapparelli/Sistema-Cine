@@ -13,6 +13,8 @@
         <li><a routerLink="/admin/promociones">Administrar Promociones</a></li>
         <li><a routerLink="/admin/candy">Administrar Candy</a></li>
         <li><a routerLink="/admin/usuarios">Administrar Usuarios</a></li>
+        <li><a routerLink="/admin/recompensas">Administrar Recompensas</a></li>
+        <li><a routerLink="/admin/reporte">Reporte</a></li>
         }
     </ul>
 
@@ -20,10 +22,11 @@
     <a routerLink="/escaner" class="btn-empleado">Escanear Entradas</a>
     }
 
-    <div class="auth-actions">
+    <div class="auth-actions" style="display: flex; flex-direction: column; width: 200px;">
         @if (authS.usuarioActual()) {
         <span class="user-badge">{{ authS.usuarioActual()?.email }}</span>
         <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesion</button>
+        <a routerLink="/mis-puntos" class="btn-puntos">Mis puntos</a>
         } @else {
         <a routerLink="/auth/login" class="btn-login">Ingresar</a>
         <a routerLink="/registro" class="btn-register">Registrarse</a>
