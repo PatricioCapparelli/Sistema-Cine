@@ -32,6 +32,8 @@ export class Candy implements OnInit, OnDestroy {
   private supabaseS = inject(Supabase); 
 
   productosDisponibles = signal<IProductoCandy[]>([]);
+  combosDisponibles = signal<any[]>([]);
+  combosAplicados = signal<any[]>([]);
   
   saldoPuntos = signal<number>(0);
   entradasGratisAplicadas = signal<number>(0);
@@ -39,14 +41,17 @@ export class Candy implements OnInit, OnDestroy {
 
   totalEntradas = computed(() => {
     const cantidadTotal = this.reservaService.butacasSeleccionadas().length;
-    const cantidadAPagar = Math.max(0, cantidadTotal - this.entradasGratisAplicadas()); 
+    const butacasRegulares = Math.max(0, cantidadTotal - this.entradasGratisAplicadas() - this.combosAplicados().length); 
     
-    const precioBruto = cantidadAPagar * this.sesionCompra.precioBaseEntrada;
+    const precioBruto = butacasRegulares * this.sesionCompra.precioBaseEntrada;
     const descuento = this.sesionCompra.descuentoAplicado();
     return precioBruto - (precioBruto * (descuento / 100));
   });
 
-  granTotal = computed(() => this.totalEntradas() + this.reservaService.totalCandy());
+  granTotal = computed(() => {
+    const totalCombos = this.combosAplicados().reduce((acc, combo) => acc + combo.precio, 0);
+    return this.totalEntradas() + this.reservaService.totalCandy() + totalCombos;
+  });
 
   async ngOnInit() {
     if (this.reservaService.butacasSeleccionadas().length === 0) {
@@ -58,6 +63,7 @@ export class Candy implements OnInit, OnDestroy {
     try {
       this.productosDisponibles.set(await this.candyService.obtenerProductos());
       await this.cargarSaldoPuntos(); 
+      await this.cargarCombos();
     } catch (error) {
       console.error('Error al cargar datos en Candy Bar', error);
     } finally {
@@ -67,6 +73,28 @@ export class Candy implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.salaEnVivo.desconectar();
+  }
+
+  private async cargarCombos() {
+    const { data } = await this.supabaseS.Supabase
+        .from('combos')
+        .select('*')
+        .eq('activo', true)
+        .order('destacado', { ascending: false });
+    
+    if (data) this.combosDisponibles.set(data);
+  }
+
+  agregarCombo(combo: any) {
+    const cantidadButacas = this.reservaService.butacasSeleccionadas().length;
+    const entradasOcupadas = this.entradasGratisAplicadas() + this.combosAplicados().length;
+
+    if (entradasOcupadas >= cantidadButacas) {
+      alert('Ya aplicaste promociones o combos a todas tus butacas.');
+      return;
+    }
+    
+    this.combosAplicados.update(combos => [...combos, combo]);
   }
 
   private async cargarSaldoPuntos() {

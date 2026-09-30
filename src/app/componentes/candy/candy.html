@@ -1,8 +1,30 @@
 <div class="checkout-container">
-    
     <div class="candy-section">
-        <h2>¿Querés sumar algo para picar?</h2>
         
+        @if (combosDisponibles().length > 0) {
+            <div class="combos-especiales">
+                <h3 class="combos-titulo">Combos Especiales (Incluyen Entrada)</h3>
+                <div class="grilla-candy">
+                    @for (combo of combosDisponibles(); track combo.id) {
+                        <div class="card-producto card-combo">
+                            <img [src]="combo.imagen_url" [alt]="combo.nombre" class="img-producto bg-white">
+                            <div class="card-body">
+                                <h3>{{ combo.nombre }}</h3>
+                                <p class="desc"><strong>{{ combo.descripcion }}</strong></p>
+                                <div class="info-precio">
+                                    <span class="precio precio-combo">${{ combo.precio }}</span>
+                                    <button class="btn-agregar btn-combo" (click)="agregarCombo(combo)">
+                                        + Llevar Combo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <h2>¿Querés sumar algo para picar?</h2>
         <div class="grilla-candy">
             @for (producto of productosDisponibles(); track producto.id) {
                 <div class="card-producto">
@@ -25,26 +47,25 @@
     <div class="resumen-section">
         <div class="ticket-resumen">
             <h3>Resumen de tu Compra</h3>
-            
             @if (authService.usuarioActual()) {
-                <div class="detalle-bloque" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #4caf50;">
-                    <h4 style="color: #2e7d32; margin-top: 0;">🎁 Programa de Puntos</h4>
-                    <p style="margin: 5px 0;">Tenés <strong>{{ saldoPuntos() }}</strong> puntos disponibles.</p>
+                <div class="detalle-bloque bloque-puntos">
+                    <h4 class="puntos-titulo">🎁 Programa de Puntos</h4>
+                    <p class="puntos-saldo">Tenés <strong>{{ saldoPuntos() }}</strong> puntos disponibles.</p>
                     
-                    <button class="btn-secundario" 
-                            style="margin-top: 10px; width: 100%; border-color: #4caf50; color: #2e7d32;" 
+                    <button class="btn-secundario btn-puntos" 
                             (click)="aplicarEntradaGratis()" 
                             [disabled]="saldoPuntos() < costoPuntosPorEntrada">
                         Canjear Entrada ({{ costoPuntosPorEntrada }} pts)
                     </button>
                     
                     @if (entradasGratisAplicadas() > 0) {
-                        <p style="color: #2e7d32; font-weight: bold; margin-top: 10px; text-align: center; margin-bottom: 0;">
-                            Canjeaste {{ entradasGratisAplicadas() }} entrada(s)!
+                        <p class="puntos-exito">
+                            ¡Canjeaste {{ entradasGratisAplicadas() }} entrada(s)!
                         </p>
                     }
                 </div>
             }
+
             <div class="detalle-bloque">
                 <h4>Entradas</h4>
                 <p><strong>{{ reservaService.detalleFuncion()?.pelicula }}</strong></p>
@@ -57,8 +78,20 @@
                 <p class="subtotal">Subtotal Entradas: ${{ totalEntradas() }}</p>
             </div>
 
-            <hr class="divisor">
+            @if (combosAplicados().length > 0) {
+                <hr class="divisor">
+                <div class="detalle-bloque">
+                    <h4 class="titulo-naranja">Combos Seleccionados</h4>
+                    @for (c of combosAplicados(); track $index) {
+                        <div class="item-carrito">
+                            <span>1x {{ c.nombre }}</span>
+                            <span>${{ c.precio }}</span>
+                        </div>
+                    }
+                </div>
+            }
 
+            <hr class="divisor">
             <div class="detalle-bloque">
                 <h4>Candy Bar</h4>
                 @for (item of reservaService.carritoCandy(); track item.producto.id) {
@@ -73,7 +106,6 @@
             </div>
 
             <hr class="divisor-fuerte">
-
             <div class="total-final">
                 <span>Total a Pagar:</span>
                 <span>${{ granTotal() }}</span>
