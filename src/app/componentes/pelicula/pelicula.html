@@ -5,7 +5,7 @@
         <h3>{{ peliculaInput()?.nombre }}</h3>
         <div class="promedio-badge">
             <span class="material-icons estrella-icon">star</span>
-            <span>{{ promedioEstrellas() }} / 5</span>
+            <span class="letras-estrellas">{{ promedioEstrellas() }} / 5</span>
             <span class="cantidad-reviews">({{ listaResenas().length }} reseñas)</span>
         </div>
         <p><strong>Duración:</strong> {{ peliculaInput()?.duracion_minutos | formatoDuracion}}</p>
@@ -22,8 +22,8 @@
                 <h2>{{ peliculaInput()?.nombre }}</h2>
                 <div class="promedio-badge">
                     <span class="material-icons estrella-icon">star</span>
-                    <span>{{ promedioEstrellas() }} / 5</span>
-                    <span class="cantidad-reviews">({{ listaResenas().length }} reseñas)</span>
+                    <span class="letras-estrellas">{{ promedioEstrellas() }} / 5</span>
+                    <span class="cantidad-reviewss">({{ listaResenas().length }} reseñas)</span>
                 </div>
             </div>
         </div>
