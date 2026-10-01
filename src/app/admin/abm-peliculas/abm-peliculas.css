@@ -101,3 +101,15 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
+.chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #E0E0E0;
+    border: none;
+    cursor: pointer;
+}
+
+.chip.selected {
+    background-color: var(--marron-claro); 
+    color: white;
+}

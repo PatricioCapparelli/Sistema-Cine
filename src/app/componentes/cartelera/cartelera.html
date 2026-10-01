@@ -1,57 +1,83 @@
 <div class="cartelera-container">
-    
-    @if (top3().length > 0) {
-        <section class="top3-section">
-            <div class="header-top3">
-                <h2 class="titulo-seccion-top">Top 3: Las Mas Elegidas</h2>
-                <button class="btn-toggle-top" (click)="toggleTop3()">
-                    {{ mostrarTop3() ? 'Ocultar' : 'Ver' }}
-                </button>
-            </div>
 
-            @if (mostrarTop3()) {
-                <div class="grid-top3">
-                    @for (peli of top3(); track peli.id; let i = $index) {
-                        <div class="card-top">
-                            <div class="medalla">{{ i + 1 }}</div>
-                            <img [src]="peli.imagen_url" [alt]="peli.nombre">
-                            <div class="info-top">
-                                <h3>{{ peli.nombre }}</h3>
-                                <p class="tickets-vendidos">{{ peli.totalTickets }} entradas vendidas</p>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-        </section>
-    }
+    <header class="hero">
+        <p class="hero-kicker">Hoy en Tosco Cine</p>
+        <h1 class="hero-titulo">En cartelera</h1>
+        @if (!cargando()) {
+        <p class="hero-subtitulo">{{ carteleraAgrupada().length }} películas con funciones disponibles</p>
+        }
 
-    <section class="buscador-section">
-        <h2 class="titulo-seccion">Cartelera de Funciones</h2>
-        <div class="barra-busqueda">
-            <input 
-                type="text" 
-                placeholder="Buscar por titulo/genero" 
-                [(ngModel)]="terminoBusqueda" 
+        <div class="barra-busqueda" role="search">
+            <svg class="icono-busqueda" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10.5 3a7.5 7.5 0 015.9 12.1l4.3 4.3-1.4 1.4-4.3-4.3A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" />
+            </svg>
+            <input
+                type="search"
+                aria-label="Buscar por título o género"
+                placeholder="Buscá por título o género"
+                [(ngModel)]="terminoBusqueda"
                 (keyup.enter)="buscar()">
-            <button class="btn-buscar" (click)="buscar()">Buscar</button>
+            <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
         </div>
+    </header>
+
+    @if (top3().length > 0) {
+    <section class="top3-section">
+        <div class="header-top3">
+            <div>
+                <p class="kicker">Ranking</p>
+                <h2 class="titulo-seccion">Las más elegidas</h2>
+            </div>
+            <button type="button" class="btn-toggle-top" (click)="toggleTop3()" [attr.aria-expanded]="mostrarTop3()">
+                {{ mostrarTop3() ? 'Ocultar ranking' : 'Ver ranking' }}
+            </button>
+        </div>
+
+        @if (mostrarTop3()) {
+        <div class="grid-top3">
+            @for (peli of top3(); track peli.id; let i = $index) {
+            <article class="card-top" [class.primero]="i === 0" [class.segundo]="i === 1" [class.tercero]="i === 2">
+                <span class="medalla">{{ i + 1 }}</span>
+                <img [src]="peli.imagen_url" [alt]="peli.nombre" loading="lazy">
+                <div class="info-top">
+                    <h3>{{ peli.nombre }}</h3>
+                    <p class="tickets-vendidos">{{ peli.totalTickets }} entradas vendidas</p>
+                </div>
+            </article>
+            }
+        </div>
+        }
     </section>
 
+    <div class="cinta" aria-hidden="true"></div>
+    }
+
     <section class="catalogo-section">
+        <div class="header-catalogo">
+            <p class="kicker">Funciones</p>
+            <h2 class="titulo-seccion">Elegí tu película</h2>
+        </div>
+
         @if (cargando()) {
-            <p class="mensaje-estado">Buscando funciones disponibles.</p>
+        <div class="grilla-peliculas" aria-busy="true">
+            @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+            <div class="esqueleto"></div>
+            }
+        </div>
         } @else if (carteleraAgrupada().length === 0) {
-            <p class="mensaje-estado">No hay funciones programadas o no coinciden con tu busqueda.</p>
+        <div class="estado-vacio">
+            <span class="estado-icono" aria-hidden="true">🎞️</span>
+            <p>No hay funciones programadas o no coinciden con tu búsqueda.</p>
+        </div>
         } @else {
-            <div class="grilla-peliculas">
-                @for (item of carteleraAgrupada(); track item.pelicula.id) {
-                    <app-pelicula 
-                        [peliculaInput]="item.pelicula" 
-                        [funcionesInput]="item.horarios">
-                    </app-pelicula>
-                }
-            </div>
+        <div class="grilla-peliculas">
+            @for (item of carteleraAgrupada(); track item.pelicula.id) {
+            <app-pelicula
+                [peliculaInput]="item.pelicula"
+                [funcionesInput]="item.horarios">
+            </app-pelicula>
+            }
+        </div>
         }
     </section>
 

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Pelicula } from '../pelicula/pelicula'; 
 import { FuncionesService } from '../../core/services/funciones.service';
 import { PeliculasService } from '../../core/services/peliculas.service'; 
+import { RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-cartelera',

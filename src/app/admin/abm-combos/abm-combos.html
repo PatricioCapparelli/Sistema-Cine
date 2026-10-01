@@ -1,0 +1,73 @@
+<div class="admin-container">
+    <h2>Combos Especiales</h2>
+    <p>Entrada + pochoclos + bebida a un precio fijo. Los destacados aparecen primero en la pantalla de compra.</p>
+
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" class="formulario-admin">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Combo Pareja">
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Qué incluye:</label>
+            <input type="text" id="descripcion" formControlName="descripcion" placeholder="Ej: 1 entrada + pochoclo grande + bebida">
+        </div>
+
+        <div class="form-group">
+            <label for="imagen_url">URL de la imagen:</label>
+            <input type="url" id="imagen_url" formControlName="imagen_url" placeholder="https://...">
+        </div>
+
+        <div class="form-group">
+            <label for="precio">Precio fijo:</label>
+            <input type="number" id="precio" min="1" step="1" formControlName="precio">
+        </div>
+
+        <div class="acciones">
+            <button type="submit" [disabled]="formulario.invalid || guardando()" class="btn-guardar">
+                {{ editandoId() ? 'Guardar cambios' : 'Crear combo' }}
+            </button>
+            @if (editandoId()) {
+            <button type="button" class="btn-secundario" (click)="cancelarEdicion()">Cancelar</button>
+            }
+        </div>
+    </form>
+
+    <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr><th>Imagen</th><th>Combo</th><th>Incluye</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+                @for (combo of combos(); track combo.id) {
+                <tr [class.inactivo]="!combo.activo">
+                    <td>
+                        @if (combo.imagen_url) {
+                        <img [src]="combo.imagen_url" [alt]="combo.nombre" class="miniatura">
+                        }
+                    </td>
+                    <td>
+                        {{ combo.nombre }}
+                        @if (combo.destacado) { <span class="etiqueta">★ Destacado</span> }
+                    </td>
+                    <td>{{ combo.descripcion }}</td>
+                    <td>$ {{ combo.precio }}</td>
+                    <td>{{ combo.activo ? 'Activo' : 'Inactivo' }}</td>
+                    <td class="acciones">
+                        <button type="button" (click)="editar(combo)">Editar</button>
+                        <button type="button" (click)="alternar(combo, 'destacado')">
+                            {{ combo.destacado ? 'Quitar destacado' : 'Destacar' }}
+                        </button>
+                        <button type="button" (click)="alternar(combo, 'activo')">
+                            {{ combo.activo ? 'Desactivar' : 'Activar' }}
+                        </button>
+                        <button type="button" (click)="eliminar(combo)">Eliminar</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr><td colspan="6">Todavía no hay combos.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

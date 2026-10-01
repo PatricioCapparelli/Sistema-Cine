@@ -133,7 +133,7 @@ export class FuncionesService {
 
     async obtenerDetalleFuncion(id: string) {
         const { data, error } = await this.s.from('Funciones')
-            .select('fecha_hora_inicio, Peliculas(nombre, edad_minima), Salas(nombre)')
+            .select('fecha_hora_inicio, Peliculas(nombre, edad_minima, fecha_estreno, preventa_activa, precio_preventa, dias_preventa), Salas(nombre)')
             .eq('id', id)
             .single();
 
@@ -184,6 +184,23 @@ export class FuncionesService {
 
         return data;
     }
+
+    async registrarCompra(ventas: Venta[], entradasGratis: number): Promise<any[]> {
+    const { data, error } = await this.s.rpc('registrar_compra', {
+        p_ventas: ventas,
+        p_entradas_gratis: entradasGratis
+    });
+
+    if (error) {
+        console.error('Error de Supabase al registrar la compra:', error);
+        if (error.code === '23505') throw new Error('BUTACA_YA_VENDIDA');
+        if (error.message.includes('VENTA_NO_DISPONIBLE')) throw new Error('VENTA_NO_DISPONIBLE');
+        if (error.message.includes('PUNTOS_INSUFICIENTES')) throw new Error('PUNTOS_INSUFICIENTES');
+        throw new Error('Error al registrar la compra');
+    }
+
+    return data as any[];
+}
 
     async validarTicketEscaneado(codigo: string) {
         const esUUID = codigo.length > 10;

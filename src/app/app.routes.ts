@@ -33,6 +33,11 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/abm-recompensas/abm-recompensas').then(m => m.AbmRecompensasComponent)
     },
     {
+        path: 'admin/combos',
+        canActivate: [logueadoGuard, adminGuard],
+        loadComponent: () => import('./admin/abm-combos/abm-combos').then(m => m.AbmCombosComponent)
+    },
+    {
         path: 'admin/candy',
         canActivate: [logueadoGuard, adminGuard],
         loadComponent: () => import('./admin/abm-candy/abm-candy').then(m => m.AbmCandyComponent)
@@ -62,6 +67,15 @@ export const routes: Routes = [
         canActivate: [compraGuard],
         loadComponent: () => import('./componentes/candy/candy').then(m => m.Candy)
     },
+    {
+    path: 'mis-peliculas',
+    canActivate: [logueadoGuard],
+    loadComponent: () => import('./componentes/mis-peliculas/mis-peliculas').then(m => m.MisPeliculasComponent)
+},
+    {
+    path: 'proximamente',
+    loadComponent: () => import('./componentes/proximamente/proximamente').then(m => m.ProximamenteComponent)
+},
 
     { path: '', redirectTo: 'cartelera', pathMatch: 'full' },
     { path: '**', redirectTo: 'cartelera' }

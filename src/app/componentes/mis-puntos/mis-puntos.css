@@ -1,0 +1,20 @@
+.aviso-canje {
+  padding: 16px;
+  margin-bottom: 20px;
+  background-color: var(--crema);
+  border: 2px solid var(--estrellas);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.codigo {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 6px;
+  color: var(--marron-oscuro);
+}
+
+.mensaje-error {
+  color: var(--marron-claro);
+  font-weight: bold;
+}

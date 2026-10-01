@@ -54,7 +54,7 @@
     align-items: center;
     gap: 6px;
     font-size: 0.9rem;
-    color: var(--crema);
+    color: var(--marron-gris);
 }
 
 .cantidad-reviews {
@@ -196,9 +196,9 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background: var(--marron-claro);
+    background-color: var(--marron-claro);
     color: white;
-    border-radius: 50%;
+    border-radius: 5px;
     border: none;
     width: 32px;
     height: 32px;
@@ -207,7 +207,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     z-index: 10;
     transition: background-color 0.2s ease;
 }

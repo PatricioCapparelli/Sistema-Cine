@@ -1,35 +1,54 @@
-<nav class="navbar-container">
-    <div class="logo">
+<header class="navbar-container">
+    <a routerLink="/cartelera" class="logo" aria-label="Tosco Cine, ir a la cartelera">
+        <span class="logo-marca">TOSCO</span>
+        <span class="logo-estrella" aria-hidden="true">★</span>
+        <span class="logo-cine">CINE</span>
+    </a>
 
-        <a routerLink="/cartelera">Tosco Cine</a>
-    </div>
-
-    <ul class="nav-links">
-        <li><a routerLink="/cartelera">Cartelera</a></li>
-
+    <nav class="nav-links" aria-label="Principal">
+        <div class="tabs">
+            <a routerLink="/cartelera" routerLinkActive="activo">Cartelera</a>
+            <a routerLink="/proximamente" routerLinkActive="activo">Próximamente</a>
+        </div>
+        
         @if (authS.rolActual() === 'admin') {
-        <li><a routerLink="/admin/peliculas">Administrar Peliculas</a></li>
-        <li><a routerLink="/admin/funciones">Administrar Funciones</a></li>
-        <li><a routerLink="/admin/promociones">Administrar Promociones</a></li>
-        <li><a routerLink="/admin/candy">Administrar Candy</a></li>
-        <li><a routerLink="/admin/usuarios">Administrar Usuarios</a></li>
-        <li><a routerLink="/admin/recompensas">Administrar Recompensas</a></li>
-        <li><a routerLink="/admin/reporte">Reporte</a></li>
+        <details class="menu menu-admin" #menuAdmin>
+            <summary>Administración <span class="flecha" aria-hidden="true"></span></summary>
+            <div class="menu-panel" (click)="menuAdmin.open = false">
+                <a routerLink="/admin/peliculas">Películas</a>
+                <a routerLink="/admin/funciones">Funciones</a>
+                <a routerLink="/admin/promociones">Promociones</a>
+                <a routerLink="/admin/candy">Candy</a>
+                <a routerLink="/admin/usuarios">Usuarios</a>
+                <a routerLink="/admin/recompensas">Recompensas</a>
+                <a routerLink="/admin/combos">Combos</a>
+                <a routerLink="/admin/reporte">Reporte</a>
+            </div>
+        </details>
         }
-    </ul>
+    </nav>
 
-    @if (authS.rolActual() === 'empleado' || authS.rolActual() === 'admin') {
-    <a routerLink="/escaner" class="btn-empleado">Escanear Entradas</a>
-    }
+    <div class="acciones">
+        @if (authS.rolActual() === 'empleado' || authS.rolActual() === 'admin') {
+        <a routerLink="/escaner" class="btn-empleado">Escanear entradas</a>
+        }
 
-    <div class="auth-actions" style="display: flex; flex-direction: column; width: 200px;">
-        @if (authS.usuarioActual()) {
-        <span class="user-badge">{{ authS.usuarioActual()?.email }}</span>
-        <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesion</button>
-        <a routerLink="/mis-puntos" class="btn-puntos">Mis puntos</a>
+        @if (authS.usuarioActual(); as usuario) {
+        <details class="menu menu-usuario" #menuUsuario>
+            <summary aria-label="Menú de usuario">
+                <span class="avatar">{{ (usuario.email ?? '?').charAt(0).toUpperCase() }}</span>
+                <span class="usuario-email">{{ usuario.email }}</span>
+                <span class="flecha" aria-hidden="true"></span>
+            </summary>
+            <div class="menu-panel menu-panel-derecha" (click)="menuUsuario.open = false">
+                <a routerLink="/mis-peliculas">Mis películas</a>
+                <a routerLink="/mis-puntos">Mis puntos</a>
+                <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+            </div>
+        </details>
         } @else {
         <a routerLink="/auth/login" class="btn-login">Ingresar</a>
         <a routerLink="/registro" class="btn-register">Registrarse</a>
         }
     </div>
-</nav>
+</header>

@@ -7,6 +7,7 @@ import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { Auth } from '../../core/services/auth.service';
 import { SalaEnVivoService } from '../../core/services/sala-en-vivo.service';
 import { Butaca } from '../../core/interfaces/Butaca';
+import { precioEntrada, estadoVenta } from '../../core/utils/venta-pelicula/venta-pelicula';
 
 @Component({
   selector: 'app-butacas',
@@ -34,7 +35,9 @@ export class Butacas implements OnInit, OnDestroy {
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
   idFuncion = signal<string | null>(null);
-  detalleFuncion = signal<{ pelicula: string; horario: string; sala: string; edadMinima: number; } | null>(null);
+  
+  // Agregamos precioEntrada y enVenta a la interfaz de la señal
+  detalleFuncion = signal<{ pelicula: string; horario: string; sala: string; edadMinima: number; precioEntrada?: number; enVenta?: boolean; } | null>(null);
 
   cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
 
@@ -103,7 +106,7 @@ export class Butacas implements OnInit, OnDestroy {
     }
 
     this.reservaService.idFuncionSeleccionada.set(idFunc);
-    this.reservaService.detalleFuncion.set(this.detalleFuncion());
+    this.reservaService.detalleFuncion.set(this.detalleFuncion() as any);
     this.reservaService.butacasSeleccionadas.set(this.butacasSeleccionadas());
 
     this.yendoACandy = true;
@@ -145,6 +148,10 @@ export class Butacas implements OnInit, OnDestroy {
   private validarAcceso(): boolean {
     const detalles = this.detalleFuncion();
     if (!detalles) return false;
+
+    if (!detalles.enVenta) {
+      return this.rechazarAcceso('Las entradas de esta película todavía no están a la venta.');
+    }
 
     const edadMinima = detalles.edadMinima;
     if (edadMinima <= 0) return true;
@@ -216,12 +223,16 @@ export class Butacas implements OnInit, OnDestroy {
     try {
       const data = await this.funcionesService.obtenerDetalleFuncion(id);
       if (!data) return;
+      
+      const pelicula = data.Peliculas as any;
 
       this.detalleFuncion.set({
-        pelicula: (data.Peliculas as any).nombre,
+        pelicula: pelicula.nombre,
         horario: new Date(data.fecha_hora_inicio).toLocaleString(),
         sala: (data.Salas as any).nombre,
-        edadMinima: (data.Peliculas as any).edad_minima || 0
+        edadMinima: pelicula.edad_minima || 0,
+        precioEntrada: precioEntrada(pelicula, this.sesionCompra.precioBaseEntrada),
+        enVenta: estadoVenta(pelicula) !== 'proximamente'
       });
     } catch (error) {
       console.error('Error al cargar detalles para el ticket:', error);

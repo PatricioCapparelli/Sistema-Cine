@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FidelizacionService, IRecompensa } from '../../core/services/fidelizacion.service';
+import { FidelizacionService } from '../../core/services/fidelizacion.service';
+import { IRecompensa } from '../../core/interfaces/Canje';
 
 @Component({
   selector: 'app-abm-recompensas',

@@ -7,3 +7,155 @@
     --crema: #DBD5CA;
     --estrellas: #FFC107;
 }
+
+body {
+    background-color: var(--marron-oscuro);
+    color: var(--crema);
+}
+
+/* Contenedor general que divide la pantalla en dos */
+.layout-principal {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--marron-oscuro);
+    color: var(--crema);
+}
+
+/* BARRA LATERAL IZQUIERDA (SIDEBAR) */
+.sidebar-nav {
+    width: 260px;
+    background-color: rgba(38, 11, 1, 0.95);
+    border-right: 2px solid var(--marron-gris);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto; /* Por si hay muchos links de admin y necesita scroll interno */
+}
+
+/* Logo arriba en la izquierda */
+.logo-wrapper {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--marron-gris);
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--estrellas);
+    letter-spacing: 2px;
+}
+
+/* Enlaces de navegación vertical */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.nav-links a {
+    display: block;
+    text-decoration: none;
+    color: var(--crema);
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+    background-color: var(--marron-gris);
+    color: var(--estrellas);
+    padding-left: 16px; /* Efecto visual sutil al pasar el mouse */
+}
+
+/* Zona de usuario y acciones abajo a la izquierda */
+.auth-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 15px;
+    border-top: 1px solid var(--marron-gris);
+}
+
+.user-badge {
+    font-size: 0.8rem;
+    color: var(--beige);
+    text-align: center;
+    word-break: break-all;
+    margin-bottom: 5px;
+}
+
+.auth-actions a,
+.auth-actions button {
+    text-decoration: none;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.btn-empleado {
+    background-color: var(--verde-suave);
+    color: var(--marron-oscuro);
+}
+
+.btn-puntos {
+    background-color: transparent;
+    color: var(--crema);
+    border: 1px solid var(--marron-claro) !important;
+}
+
+.btn-puntos:hover {
+    background-color: var(--marron-claro);
+    color: white;
+}
+
+.btn-logout {
+    background-color: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b !important;
+}
+
+.btn-logout:hover {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.btn-login {
+    background-color: var(--marron-claro);
+    color: white;
+}
+
+.btn-register {
+    background-color: transparent;
+    color: var(--estrellas);
+    border: 1px solid var(--estrellas) !important;
+}
+
+.contenido-principal {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}

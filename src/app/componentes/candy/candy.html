@@ -1,45 +1,50 @@
 <div class="checkout-container">
     <div class="candy-section">
-        
+
         @if (combosDisponibles().length > 0) {
-            <div class="combos-especiales">
-                <h3 class="combos-titulo">Combos Especiales (Incluyen Entrada)</h3>
-                <div class="grilla-candy">
-                    @for (combo of combosDisponibles(); track combo.id) {
-                        <div class="card-producto card-combo">
-                            <img [src]="combo.imagen_url" [alt]="combo.nombre" class="img-producto bg-white">
-                            <div class="card-body">
-                                <h3>{{ combo.nombre }}</h3>
-                                <p class="desc"><strong>{{ combo.descripcion }}</strong></p>
-                                <div class="info-precio">
-                                    <span class="precio precio-combo">${{ combo.precio }}</span>
-                                    <button class="btn-agregar btn-combo" (click)="agregarCombo(combo)">
-                                        + Llevar Combo
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+        <div class="combos-especiales">
+            <h3 class="combos-titulo">Combos Especiales (Incluyen Entrada)</h3>
+            <div class="grilla-candy">
+                @for (combo of combosDisponibles(); track combo.id) {
+                <div class="card-producto card-combo" [class.destacado]="combo.destacado">
+                    @if (combo.destacado) {
+                    <span class="etiqueta-destacado">Destacado</span>
                     }
+                    @if (combo.imagen_url) {
+                    <img [src]="combo.imagen_url" [alt]="combo.nombre" class="img-producto bg-white">
+                    }
+                    <div class="card-body">
+                        <h3>{{ combo.nombre }}</h3>
+                        <p class="desc"><strong>{{ combo.descripcion }}</strong></p>
+                        <div class="info-precio">
+                            <span class="precio precio-combo">${{ combo.precio }}</span>
+                            <button type="button" class="btn-agregar btn-combo" (click)="agregarCombo(combo)">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
                 </div>
+                }
             </div>
+        </div>
         }
 
         <h2>¿Querés sumar algo para picar?</h2>
         <div class="grilla-candy">
             @for (producto of productosDisponibles(); track producto.id) {
-                <div class="card-producto">
-                    <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto">
-                    <div class="card-body">
-                        <h3>{{ producto.nombre }}</h3>
-                        <p class="desc">{{ producto.descripcion }}</p>
-                        <div class="info-precio">
-                            <span class="precio">${{ producto.precio }}</span>
-                            <button class="btn-agregar" (click)="agregar(producto)">+ Agregar</button>
-                        </div>
+            <div class="card-producto">
+                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto">
+                <div class="card-body">
+                    <h3>{{ producto.nombre }}</h3>
+                    <p class="desc">{{ producto.descripcion }}</p>
+                    <div class="info-precio">
+                        <span class="precio">${{ producto.precio }}</span>
+                        <button type="button" class="btn-agregar" (click)="agregar(producto)"> Agregar</button>
                     </div>
                 </div>
+            </div>
             } @empty {
-                <p>No hay productos disponibles en este momento.</p>
+            <p>No hay productos disponibles en este momento.</p>
             }
         </div>
     </div>
@@ -47,60 +52,67 @@
     <div class="resumen-section">
         <div class="ticket-resumen">
             <h3>Resumen de tu Compra</h3>
+
             @if (authService.usuarioActual()) {
-                <div class="detalle-bloque bloque-puntos">
-                    <h4 class="puntos-titulo">🎁 Programa de Puntos</h4>
-                    <p class="puntos-saldo">Tenés <strong>{{ saldoPuntos() }}</strong> puntos disponibles.</p>
-                    
-                    <button class="btn-secundario btn-puntos" 
-                            (click)="aplicarEntradaGratis()" 
-                            [disabled]="saldoPuntos() < costoPuntosPorEntrada">
-                        Canjear Entrada ({{ costoPuntosPorEntrada }} pts)
-                    </button>
-                    
-                    @if (entradasGratisAplicadas() > 0) {
-                        <p class="puntos-exito">
-                            ¡Canjeaste {{ entradasGratisAplicadas() }} entrada(s)!
-                        </p>
-                    }
-                </div>
+            <div class="detalle-bloque bloque-puntos">
+                <h4 class="puntos-titulo">Programa de Puntos</h4>
+                <p class="puntos-saldo">Tenés <strong>{{ saldoPuntos() }}</strong> puntos disponibles.</p>
+
+                @if (costoPuntosPorEntrada() > 0) {
+                <button type="button" class="btn-secundario btn-puntos"
+                        (click)="aplicarEntradaGratis()"
+                        [disabled]="!puedeCanjear()">
+                    Canjear Entrada ({{ costoPuntosPorEntrada() }} pts)
+                </button>
+                }
+
+                @if (entradasGratisAplicadas() > 0) {
+                <p class="puntos-exito">
+                    ¡Canjeaste {{ entradasGratisAplicadas() }} entrada(s)!
+                    <button type="button" class="btn-quitar" (click)="quitarEntradaGratis()">Quitar una</button>
+                </p>
+                }
+            </div>
             }
 
             <div class="detalle-bloque">
                 <h4>Entradas</h4>
                 <p><strong>{{ reservaService.detalleFuncion()?.pelicula }}</strong></p>
                 <p>{{ reservaService.detalleFuncion()?.horario }}</p>
-                <p>Butacas: 
+                <p>Butacas:
                     @for (b of reservaService.butacasSeleccionadas(); track b.id) {
-                        <span>{{ b.id }} </span>
+                    <span>{{ b.id }} </span>
                     }
                 </p>
                 <p class="subtotal">Subtotal Entradas: ${{ totalEntradas() }}</p>
             </div>
 
             @if (combosAplicados().length > 0) {
-                <hr class="divisor">
-                <div class="detalle-bloque">
-                    <h4 class="titulo-naranja">Combos Seleccionados</h4>
-                    @for (c of combosAplicados(); track $index) {
-                        <div class="item-carrito">
-                            <span>1x {{ c.nombre }}</span>
-                            <span>${{ c.precio }}</span>
-                        </div>
-                    }
+            <hr class="divisor">
+            <div class="detalle-bloque">
+                <h4 class="titulo-naranja">Combos Seleccionados</h4>
+                @for (c of combosAplicados(); track $index) {
+                <div class="item-carrito">
+                    <span>1x {{ c.nombre }}</span>
+                    <span>
+                        ${{ c.precio }}
+                        <button type="button" class="btn-quitar" (click)="quitarCombo($index)">Quitar</button>
+                    </span>
                 </div>
+                }
+            </div>
             }
 
             <hr class="divisor">
             <div class="detalle-bloque">
                 <h4>Candy Bar</h4>
                 @for (item of reservaService.carritoCandy(); track item.producto.id) {
-                    <div class="item-carrito">
-                        <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
-                        <span>${{ item.producto.precio * item.cantidad }}</span>
-                    </div>
+                <div class="item-carrito">
+                    <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                    <span>${{ item.producto.precio * item.cantidad }}</span>
+                </div>
                 } @empty {
-                    <p class="sin-candy">No sumaste productos.</p>
+                <p class="sin-candy">No sumaste productos.</p>
                 }
                 <p class="subtotal">Subtotal Candy: ${{ reservaService.totalCandy() }}</p>
             </div>
@@ -111,11 +123,11 @@
                 <span>${{ granTotal() }}</span>
             </div>
 
-            <button class="btn-comprar-final" (click)="confirmarCompraFinal()">
-                Confirmar y Pagar
+            <button type="button" class="btn-comprar-final" [disabled]="comprando()" (click)="confirmarCompraFinal()">
+                {{ comprando() ? 'Procesando...' : 'Confirmar y Pagar' }}
             </button>
-            
-            <button class="btn-secundario" routerLink="/cartelera">
+
+            <button type="button" class="btn-secundario" routerLink="/cartelera">
                 Cancelar Compra
             </button>
         </div>

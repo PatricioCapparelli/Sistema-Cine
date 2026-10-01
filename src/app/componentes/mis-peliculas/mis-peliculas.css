@@ -1,0 +1,9 @@
+.mis-peliculas { padding: 20px; color: var(--marron-oscuro); }
+.grilla-vistas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.card-vista { overflow: hidden; background-color: var(--crema); border: 1px solid var(--beige); border-radius: 10px; }
+.card-vista img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.card-body { display: flex; flex-direction: column; gap: 4px; padding: 12px; }
+.card-body h3, .card-body p { margin: 0; }
+.estrellas { color: var(--estrellas, #fbc02d); font-size: 1.3rem; letter-spacing: 2px; }
+.sin-calificar { color: var(--marron-gris); font-size: 0.9rem; font-style: italic; }
+.mensaje-error { color: var(--marron-claro); font-weight: bold; }

@@ -1,26 +1,21 @@
-import { Injectable, inject } from '@angular/core';
+import { Service, inject } from '@angular/core';
 import { Supabase } from './supabase.service';
+import { IRecompensa, ICanje } from '../interfaces/Canje';
 
-export interface IRecompensa {
-    id: number;
-    nombre: string;
-    tipo: 'entrada' | 'candy';
-    costo_puntos: number;
-    activa: boolean;
-}
-
-export interface ICanje {
-    id: number;
-    nombre_recompensa: string;
-    puntos_gastados: number;
-    codigo: string;
-    estado: string;
-    created_at: string;
-}
-
-@Injectable({ providedIn: 'root' })
+@Service()
 export class FidelizacionService {
     private s = inject(Supabase).Supabase;
+
+    private readonly ERRORES_CANJE: Record<string, string> = {
+        PUNTOS_INSUFICIENTES: 'PUNTOS_INSUFICIENTES',
+        RECOMPENSA_INVALIDA: 'RECOMPENSA_INVALIDA',
+        NO_AUTENTICADO: 'NO_AUTENTICADO'
+    };
+
+    private readonly ERRORES_VALIDACION: Record<string, string> = {
+        CANJE_INVALIDO: 'El código no existe o ya fue utilizado.',
+        NO_AUTORIZADO: 'No tenés permiso para validar canjes.'
+    };
 
     async obtenerRecompensas(soloActivas: boolean): Promise<IRecompensa[]> {
         let consulta = this.s.from('Recompensas').select('*').order('costo_puntos', { ascending: true });
@@ -36,7 +31,7 @@ export class FidelizacionService {
         if (error) throw new Error('Error al crear la recompensa');
     }
 
-    async actualizarRecompensa(id: number, cambios: Partial<IRecompensa>): Promise<void> {
+    async actualizarRecompensa(id: number, cambios: Partial<Omit<IRecompensa, 'id'>>): Promise<void> {
         const { error } = await this.s.from('Recompensas').update(cambios).eq('id', id);
         if (error) throw new Error('Error al actualizar la recompensa');
     }
@@ -57,10 +52,24 @@ export class FidelizacionService {
         const { data, error } = await this.s.rpc('canjear_recompensa', { p_recompensa: recompensaId });
 
         if (error) {
-            if (error.message.includes('PUNTOS_INSUFICIENTES')) throw new Error('PUNTOS_INSUFICIENTES');
-            throw new Error('Error al canjear la recompensa');
+            throw new Error(this.traducirError(error.message, this.ERRORES_CANJE, 'Error al canjear la recompensa'));
         }
 
         return data as string;
+    }
+
+    async validarCanje(codigo: string): Promise<string> {
+        const { data, error } = await this.s.rpc('validar_canje', { p_codigo: codigo });
+
+        if (error) {
+            throw new Error(this.traducirError(error.message, this.ERRORES_VALIDACION, 'Error al conectar con el servidor.'));
+        }
+
+        return data as string;
+    }
+
+    private traducirError(mensaje: string, equivalencias: Record<string, string>, porDefecto: string): string {
+        const clave = Object.keys(equivalencias).find(codigo => mensaje.includes(codigo));
+        return clave ? equivalencias[clave] : porDefecto;
     }
 }

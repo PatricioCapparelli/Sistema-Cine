@@ -15,7 +15,7 @@
 @if (modalAbierto()) {
 <div class="modal-overlay" (click)="cerrarModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-        <button class="btn-cerrar" (click)="cerrarModal()">✖</button>
+        <button class="btn-cerrar" (click)="cerrarModal()">X</button>
         <div class="modal-header">
             <img [src]="peliculaInput()?.imagen_url" [alt]="peliculaInput()?.nombre" class="img-modal" />
             <div class="modal-header-texto">
@@ -36,6 +36,17 @@
                 Eliminar Pelicula
             </button>
             } @else {
+            @if (estado() === 'proximamente') {
+            <section class="caja">
+                <h4>Próximamente</h4>
+                <div class="caja-body">
+                    <p>Todavía no habilitamos la venta para esta película.</p>
+                    @if (fechaInicioPreventa()) {
+                    <p>Las entradas van a estar disponibles a partir del <strong>{{ fechaInicioPreventa() | date:'dd/MM/yyyy' }}</strong>.</p>
+                    }
+                </div>
+            </section>
+            } @else {
             <section class="caja">
                 <h4>Horarios disponibles</h4>
                 <div class="caja-body">
@@ -52,6 +63,10 @@
                 </div>
             </section>
 
+            @if (estado() === 'preventa') {
+            <span class="etiqueta-preventa">Preventa ${{ peliculaInput()?.precio_preventa }}</span>
+            }
+            }
             <section class="caja">
                 <h4>Opiniones del público</h4>
                 <div class="caja-body">
@@ -79,7 +94,7 @@
                         <h5>Dejá tu opinión</h5>
                         <div class="input-group">
                             <label>Calificación:</label>
-                            <select [(ngModel)]="nuevaCalificacion">
+                            <select [ngModel]="nuevaCalificacion()" (ngModelChange)="nuevaCalificacion.set($event)">
                                 <option [value]="5">★★★★★ Excelente</option>
                                 <option [value]="4">★★★★ Muy buena</option>
                                 <option [value]="3">★★★ Regular</option>
@@ -88,7 +103,7 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <textarea rows="2" placeholder="¿Qué te pareció?" [(ngModel)]="nuevoComentario"></textarea>
+                            <textarea rows="2" placeholder="¿Qué te pareció?" [ngModel]="nuevoComentario()" (ngModelChange)="nuevoComentario.set($event)"></textarea>
                         </div>
                         <button class="btn-publicar" (click)="publicarResena()">Publicar</button>
                     </div>

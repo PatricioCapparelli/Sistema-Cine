@@ -2,11 +2,23 @@
     <h2>Mis Puntos</h2>
     <p class="saldo"><strong>{{ saldo() }}</strong> puntos</p>
 
+    @if (ultimoCanje(); as canje) {
+    <div class="aviso-canje">
+        <p>Canjeaste <strong>{{ canje.recompensa }}</strong>. Mostrá este código en el mostrador:</p>
+        <p class="codigo">{{ canje.codigo }}</p>
+        <button type="button" (click)="cerrarAviso()">Entendido</button>
+    </div>
+    }
+
+    @if (errorCarga()) {
+    <p class="mensaje-error">No se pudieron cargar tus datos. <button type="button" (click)="cargar()">Reintentar</button></p>
+    }
+
     <h3>Recompensas</h3>
     @for (r of recompensas(); track r.id) {
     <div class="recompensa">
         <span>{{ r.nombre }} — {{ r.costo_puntos }} pts</span>
-        <button type="button" [disabled]="saldo() < r.costo_puntos" (click)="canjear(r)">Canjear</button>
+        <button type="button" [disabled]="canjeando() || saldo() < r.costo_puntos" (click)="canjear(r)">Canjear</button>
     </div>
     } @empty {
     <p>Todavía no hay recompensas disponibles.</p>

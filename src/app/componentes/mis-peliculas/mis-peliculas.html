@@ -1,0 +1,32 @@
+<div class="mis-peliculas">
+    <h2>Mis películas</h2>
+    
+    @if (cargando()) {
+    <p>Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje-error">No se pudo cargar tu historial. Intentá de nuevo más tarde.</p>
+    } @else {
+    <div class="grilla-vistas">
+        @for (p of peliculas(); track p.funcion_id) {
+        <article class="card-vista">
+            @if (p.imagen_url) {
+            <img [src]="p.imagen_url" [alt]="p.nombre" loading="lazy">
+            }
+            <div class="card-body">
+                <h3>{{ p.nombre }}</h3>
+                <p>{{ p.fecha_funcion | date: 'dd/MM/yyyy HH:mm' }}</p>
+                <p>{{ p.entradas }} {{ p.entradas === 1 ? 'entrada' : 'entradas' }}</p>
+                
+                @if (p.calificacion) {
+                <p class="estrellas" [attr.aria-label]="'Tu calificación: ' + p.calificacion + ' de 5'">{{ estrellas(p.calificacion) }}</p>
+                } @else {
+                <p class="sin-calificar">Todavía no la calificaste</p>
+                }
+            </div>
+        </article>
+        } @empty {
+        <p>Todavía no hay películas en tu historial. Aparecen cuando escanean tu entrada en el cine.</p>
+        }
+    </div>
+    }
+</div>

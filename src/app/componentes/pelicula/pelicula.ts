@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit, inject, signal } from '@angular/core';
+import { Component, input, output, OnInit, inject, signal, computed } from '@angular/core';
 import { IPelicula } from '../../core/interfaces/Pelicula';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -8,6 +8,7 @@ import { ResenasService } from '../../core/services/resenas.service';
 import { Auth } from '../../core/services/auth.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
+import { estadoVenta, inicioPreventa } from '../../core/utils/venta-pelicula/venta-pelicula';
 
 @Component({
   selector: 'app-pelicula',
@@ -34,6 +35,9 @@ export class Pelicula implements OnInit {
   nuevaCalificacion = signal<number>(5);
   nuevoComentario = signal<string>('');
 
+  estado = computed(() => estadoVenta(this.peliculaInput() ?? {}));
+  fechaInicioPreventa = computed(() => inicioPreventa(this.peliculaInput() ?? {}));
+  
   async ngOnInit() {
     await this.cargarResenas();
   }
@@ -115,6 +119,10 @@ export class Pelicula implements OnInit {
   }
 
   iniciarCompra(funcion: any) {
+    if (estadoVenta(this.peliculaInput() ?? {}) === 'proximamente') {
+      alert('Las entradas de esta película todavía no están a la venta.');
+      return;
+    }
     console.log('usuario', this.authService.usuarioActual(), 'perfil', this.authService.perfilActual(), 'anonimo', this.sesionCompra.esAnonimo(), 'funcion', funcion);
     const peli = this.peliculaInput();
     const edadMinima = peli?.edad_minima || 0;

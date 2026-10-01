@@ -1,0 +1,15 @@
+.proximamente { padding: 20px; color: var(--marron-oscuro); }
+.grilla-proximas { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+.card-proxima { display: flex; flex-direction: column; overflow: hidden; background-color: var(--crema); border: 1px solid var(--beige); border-radius: 10px; }
+.card-proxima img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.card-body { display: flex; flex-direction: column; gap: 6px; padding: 12px; }
+.card-body h3, .card-body p { margin: 0; }
+.genero { color: var(--marron-gris); font-size: 0.9rem; }
+.preventa { color: var(--marron-claro); font-weight: bold; }
+.preventa-futura { color: var(--marron-gris); font-size: 0.9rem; }
+.btn-ver, .btn-alerta { margin-top: 6px; padding: 8px 12px; text-align: center; text-decoration: none; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-ver { background-color: var(--marron-claro); color: var(--crema); }
+.btn-alerta { background-color: transparent; color: var(--marron-oscuro); border: 1px solid var(--marron-gris); }
+.btn-alerta.activa { background-color: var(--estrellas, #fbc02d); border-color: var(--estrellas, #fbc02d); }
+.btn-alerta:disabled { opacity: 0.6; cursor: not-allowed; }
+.mensaje-error { color: var(--marron-claro); font-weight: bold; }

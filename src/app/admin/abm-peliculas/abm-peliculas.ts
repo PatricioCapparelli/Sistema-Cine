@@ -1,27 +1,38 @@
-import { Component, inject, OnInit, signal } from '@angular/core'; 
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { PeliculasService } from '../../core/services/peliculas.service';
 import { TmdbService } from '../../core/services/tmdb.service';
 import { IPelicula } from '../../core/interfaces/Pelicula';
 import { Tmdb } from '../../core/interfaces/Tmdb';
-import { Pelicula } from '../../componentes/pelicula/pelicula'; 
+import { Pelicula } from '../../componentes/pelicula/pelicula';
 import { SlicePipe } from '@angular/common';
 
 @Component({
     selector: 'app-abm-peliculas',
     standalone: true,
-    imports: [ReactiveFormsModule, FormsModule, Pelicula, SlicePipe], 
+    imports: [ReactiveFormsModule, FormsModule, Pelicula, SlicePipe],
     templateUrl: './abm-peliculas.html',
     styleUrl: './abm-peliculas.css'
 })
 export class AbmPeliculasComponent implements OnInit {
     private fb = inject(FormBuilder);
     private peliculasService = inject(PeliculasService);
-    private tmdbService = inject(TmdbService); 
+    private tmdbService = inject(TmdbService);
 
     listaPeliculas = signal<IPelicula[]>([]);
     terminoBusqueda = signal<string>('');
     resultadosTmdb = signal<Tmdb[]>([]);
+
+    meses = [
+        { nombre: 'Ene', valor: '01' }, { nombre: 'Feb', valor: '02' }, { nombre: 'Mar', valor: '03' },
+        { nombre: 'Abr', valor: '04' }, { nombre: 'May', valor: '05' }, { nombre: 'Jun', valor: '06' },
+        { nombre: 'Jul', valor: '07' }, { nombre: 'Ago', valor: '08' }, { nombre: 'Sep', valor: '09' },
+        { nombre: 'Oct', valor: '10' }, { nombre: 'Nov', valor: '11' }, { nombre: 'Dic', valor: '12' }
+    ];
+
+    diaEstreno = '';
+    mesEstreno = '';
+    anioEstreno = '2026'; 
 
     peliculaForm = this.fb.group({
         nombre: ['', Validators.required],
@@ -29,7 +40,11 @@ export class AbmPeliculasComponent implements OnInit {
         imagen_url: ['', Validators.required],
         duracion_minutos: [0, [Validators.required, Validators.min(1)]],
         genero: ['', Validators.required],
-        edad_minima: [0, [Validators.required, Validators.min(0)]]
+        edad_minima: [0, [Validators.required, Validators.min(0)]],
+        fecha_estreno: [''],
+        preventa_activa: [false],
+        precio_preventa: [null as number | null],
+        dias_preventa: [7, [Validators.required, Validators.min(1)]]
     });
 
     ngOnInit() {
@@ -39,11 +54,17 @@ export class AbmPeliculasComponent implements OnInit {
     buscarEnTmdb() {
         const termino = this.terminoBusqueda().trim();
         if (!termino) return;
-        
+
         this.tmdbService.buscar(termino).subscribe({
             next: (resultados) => this.resultadosTmdb.set(resultados),
             error: (err) => console.error('Error buscando en TMDB', err)
         });
+    }
+
+    estrenoEn(dias: number) {
+        const fecha = new Date();
+        fecha.setDate(fecha.getDate() + dias);
+        this.peliculaForm.patchValue({ fecha_estreno: fecha.toLocaleDateString('en-CA') });
     }
 
     seleccionarPelicula(idTmdb: number) {
@@ -56,7 +77,7 @@ export class AbmPeliculasComponent implements OnInit {
                     duracion_minutos: peliCompletada.duracion_minutos,
                     genero: peliCompletada.genero
                 });
-                
+
                 this.resultadosTmdb.set([]);
                 this.terminoBusqueda.set('');
             },
@@ -67,31 +88,51 @@ export class AbmPeliculasComponent implements OnInit {
     async cargarPeliculas() {
         try {
             const pelis = await this.peliculasService.obtenerPeliculas();
-            this.listaPeliculas.set(pelis || []); 
+            this.listaPeliculas.set(pelis || []);
         } catch (error) {
             console.error('Error al cargar la lista', error);
         }
     }
 
     async guardarPelicula() {
-        if (this.peliculaForm.valid) {
-            try {
-                const nuevaPelicula = this.peliculaForm.value as IPelicula;
-                await this.peliculasService.crearPelicula(nuevaPelicula);
+    if (this.peliculaForm.valid) {
+        try {
+            const valores = this.peliculaForm.getRawValue();
+            const conPreventa = !!valores.preventa_activa;
 
-                alert('Pelicula guardada con exito');
-                this.peliculaForm.reset({ duracion_minutos: 0, edad_minima: 0 });
-
-                this.cargarPeliculas();
-            } catch (error) {
-                console.error('Error al guardar', error);
+            if (conPreventa && (!valores.fecha_estreno || !valores.precio_preventa)) {
+                alert('Para activar la preventa cargá la fecha de estreno y el precio de preventa.');
+                return;
             }
+
+            const nuevaPelicula = {
+                ...valores,
+                fecha_estreno: valores.fecha_estreno || null,
+                precio_preventa: conPreventa ? Math.round(Number(valores.precio_preventa)) : null
+            } as IPelicula;
+
+            await this.peliculasService.crearPelicula(nuevaPelicula);
+
+            alert('Pelicula guardada con exito');
+            
+            this.peliculaForm.reset({ 
+                duracion_minutos: 0, 
+                edad_minima: 0,
+                preventa_activa: false, 
+                dias_preventa: 7 
+            });
+
+            this.cargarPeliculas();
+            
+        } catch (error) {
+            console.error('Error al guardar', error);
         }
     }
+}
 
     async eliminarPeliculaDeBD(id: number | undefined) {
         if (!id) return;
-        
+
         const confirmacion = confirm('Estas seguro de que queres borrar esta pelicula?');
         if (!confirmacion) return;
 
@@ -101,5 +142,39 @@ export class AbmPeliculasComponent implements OnInit {
         } catch (error) {
             console.error('Error al borrar', error);
         }
+    }
+
+    actualizarFechaFormulario() {
+        if (this.diaEstreno && this.mesEstreno && this.anioEstreno) {
+            // Aseguramos que el día tenga dos dígitos
+            const diaFormateado = this.diaEstreno.padStart(2, '0');
+            // Formato ISO: YYYY-MM-DD
+            const fechaString = `${this.anioEstreno}-${this.mesEstreno}-${diaFormateado}`;
+            this.peliculaForm.patchValue({ fecha_estreno: fechaString });
+        } else {
+            this.peliculaForm.patchValue({ fecha_estreno: '' });
+        }
+    }
+
+    setDiaEstreno(event: any) {
+        this.diaEstreno = event.target.value;
+        this.actualizarFechaFormulario();
+    }
+
+    setAnioEstreno(event: any) {
+        this.anioEstreno = event.target.value;
+        this.actualizarFechaFormulario();
+    }
+
+    setMesEstreno(mes: string) {
+        this.mesEstreno = mes;
+        this.actualizarFechaFormulario();
+    }
+
+    limpiarFechaEstreno() {
+        this.diaEstreno = '';
+        this.mesEstreno = '';
+        this.anioEstreno = '';
+        this.peliculaForm.patchValue({ fecha_estreno: '' });
     }
 }

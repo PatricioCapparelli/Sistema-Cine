@@ -53,13 +53,59 @@
             <input type="text" formControlName="genero" placeholder="Ej: Acción, Drama...">
         </div>
 
-        <label for="edad_minima">Edad mínima</label>
-        <select id="edad_minima" formControlName="edad_minima">
-            <option [ngValue]="0">ATP (todo publico)</option>
-            <option [ngValue]="13">+13</option>
-            <option [ngValue]="16">+16</option>
-            <option [ngValue]="18">+18</option>
-        </select>
+        <!-- Lo envolví en form-group para que quede alineado con el resto, si te rompe el CSS podés sacarle el div -->
+        <div class="form-group">
+            <label for="edad_minima">Edad mínima</label>
+            <select id="edad_minima" formControlName="edad_minima">
+                <option [ngValue]="0">ATP (todo publico)</option>
+                <option [ngValue]="13">+13</option>
+                <option [ngValue]="16">+16</option>
+                <option [ngValue]="18">+18</option>
+            </select>
+        </div>
+
+        <!-- NUEVOS CAMPOS DE PREVENTA CON ESTILO CHIPS -->
+        <div class="form-group">
+            <label>Fecha de Estreno (vacío = ya en cartelera):</label>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="number" placeholder="Día" min="1" max="31" [value]="diaEstreno"
+                    (input)="setDiaEstreno($event)" style="width: 60px;">
+                <input type="number" placeholder="Año" min="2026" [value]="anioEstreno" (input)="setAnioEstreno($event)"
+                    style="width: 80px;">
+                <button type="button" class="chip" (click)="limpiarFechaEstreno()">Sin fecha</button>
+            </div>
+
+            <div class="chips-container" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                @for (mes of meses; track mes.valor) {
+                <button type="button" class="chip" [class.selected]="mesEstreno === mes.valor"
+                    (click)="setMesEstreno(mes.valor)">
+                    {{ mes.nombre }}
+                </button>
+                }
+            </div>
+            <!-- Input oculto para que el FormGroup siga funcionando -->
+            <input type="hidden" formControlName="fecha_estreno">
+        </div>
+
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" formControlName="preventa_activa"> Habilitar preventa
+            </label>
+        </div>
+
+        @if (peliculaForm.get('preventa_activa')?.value) {
+        <div class="form-group">
+            <label for="dias_preventa">Días de preventa antes del estreno:</label>
+            <input type="number" id="dias_preventa" min="1" formControlName="dias_preventa">
+        </div>
+
+        <div class="form-group">
+            <label for="precio_preventa">Precio de preventa:</label>
+            <input type="number" id="precio_preventa" min="1" step="1" formControlName="precio_preventa">
+        </div>
+        }
+        <!-- FIN NUEVOS CAMPOS -->
 
         @if (peliculaForm.get('imagen_url')?.value) {
         <div class="vista-previa-poster">

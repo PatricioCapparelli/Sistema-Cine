@@ -1,0 +1,40 @@
+<div class="proximamente">
+    <h2>Próximamente</h2>
+    
+    @if (cargando()) {
+    <p>Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje-error">No se pudieron cargar los estrenos. Intentá de nuevo más tarde.</p>
+    } @else {
+    <div class="grilla-proximas">
+        @for (p of peliculas(); track p.id) {
+        <article class="card-proxima">
+            @if (p.imagen_url) {
+            <img [src]="p.imagen_url" [alt]="p.nombre" loading="lazy">
+            }
+            <div class="card-body">
+                <h3>{{ p.nombre }}</h3>
+                <p class="genero">{{ p.genero }}</p>
+                <p class="estreno">Estreno: <strong>{{ p.fecha_estreno | date: 'dd/MM/yyyy' }}</strong></p>
+                
+                @if (estado(p) === 'preventa') {
+                <p class="preventa">Preventa abierta: ${{ p.precio_preventa }}</p>
+                <a routerLink="/cartelera" class="btn-ver">Ver funciones</a>
+                } @else if (inicioDePreventa(p); as inicio) {
+                <p class="preventa-futura">Preventa desde el {{ inicio | date: 'dd/MM/yyyy' }}</p>
+                }
+                
+                <button type="button" class="btn-alerta"
+                    [class.activa]="alertas().has(p.id)"
+                    [disabled]="procesando() === p.id"
+                    (click)="alternarAlerta(p)">
+                    {{ alertas().has(p.id) ? '🔔 Alerta activada' : '🔔 Avisarme' }}
+                </button>
+            </div>
+        </article>
+        } @empty {
+        <p>No hay estrenos cargados por el momento.</p>
+        }
+    </div>
+    }
+</div>
