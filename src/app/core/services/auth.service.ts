@@ -52,6 +52,8 @@ export class Auth {
 
         if (respuesta.error) throw respuesta.error;
 
+        if (respuesta.data.user?.identities?.length === 0) throw new Error('EMAIL_EXISTENTE');
+        
         if (respuesta.data.user) {
             const nuevoUsuario: IUsuario = {
                 id: respuesta.data.user.id,

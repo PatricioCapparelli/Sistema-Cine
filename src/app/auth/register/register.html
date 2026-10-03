@@ -1,34 +1,70 @@
 <div class="auth-container">
     <h2>Registro de Usuario</h2>
 
+    @if (errorServidor(); as mensaje) {
+    <div class="banner-error" role="alert">{{ mensaje }}</div>
+    }
+
     <form [formGroup]="registroForm" (ngSubmit)="registrar()">
         <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" id="email" formControlName="email">
+            <input type="email" id="email" formControlName="email" autocomplete="email"
+                [class.invalido]="error('email')" [attr.aria-invalid]="!!error('email')">
+            @if (error('email'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
             <label for="password">Contraseña:</label>
-            <input type="password" id="password" formControlName="password">
+            <div class="campo-password">
+                <input [type]="mostrarPassword() ? 'text' : 'password'" id="password" formControlName="password"
+                    autocomplete="new-password"
+                    [class.invalido]="error('password')" [attr.aria-invalid]="!!error('password')">
+                <button type="button" class="btn-ver" [attr.aria-pressed]="mostrarPassword()"
+                    (click)="mostrarPassword.set(!mostrarPassword())">
+                    {{ mostrarPassword() ? 'Ocultar' : 'Mostrar' }}
+                </button>
+            </div>
+            @if (registroForm.controls.password.value || intentoEnvio()) {
+            <ul class="requisitos">
+                @for (requisito of requisitosPassword(); track requisito.texto) {
+                <li [class.cumple]="requisito.cumple">{{ requisito.texto }}</li>
+                }
+            </ul>
+            }
+            @if (error('password'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
             <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" formControlName="nombre">
+            <input type="text" id="nombre" formControlName="nombre" autocomplete="given-name"
+                [class.invalido]="error('nombre')" [attr.aria-invalid]="!!error('nombre')">
+            @if (error('nombre'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
             <label for="apellido">Apellido:</label>
-            <input type="text" id="apellido" formControlName="apellido">
+            <input type="text" id="apellido" formControlName="apellido" autocomplete="family-name"
+                [class.invalido]="error('apellido')" [attr.aria-invalid]="!!error('apellido')">
+            @if (error('apellido'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
             <label>Fecha de Nacimiento:</label>
             <div class="fecha-campos">
                 <input type="text" inputmode="numeric" maxlength="2" placeholder="Día"
-                    class="campo-corto" [value]="dia()" (input)="actualizarDia($event)">
+                    class="campo-corto" [class.invalido]="mensajeFecha()"
+                    [value]="dia()" (input)="actualizarDia($event)">
                 <input type="text" inputmode="numeric" maxlength="4" placeholder="Año"
-                    class="campo-medio" [value]="anio()" (input)="actualizarAnio($event)">
+                    class="campo-medio" [class.invalido]="mensajeFecha()"
+                    [value]="anio()" (input)="actualizarAnio($event)">
             </div>
             <div class="chips chips-meses">
                 @for (nombre of MESES; track nombre; let i = $index) {
@@ -39,8 +75,8 @@
                 </button>
                 }
             </div>
-            @if (fechaInvalida()) {
-            <p class="error-fecha">La fecha no es válida.</p>
+            @if (mensajeFecha(); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
             }
         </div>
 
@@ -55,6 +91,9 @@
                 </button>
                 }
             </div>
+            @if (error('tipo_sangre'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
@@ -68,6 +107,9 @@
                 </button>
                 }
             </div>
+            @if (error('color_ojos'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
         <div class="form-group">
@@ -80,13 +122,17 @@
                     {{ dias }}
                 </button>
                 }
-                <input type="number" min="0" class="campo-corto" placeholder="Otro"
-                    formControlName="dias_vacaciones">
+                <input type="number" min="0" max="365" step="1" class="campo-corto" placeholder="Otro"
+                    formControlName="dias_vacaciones"
+                    [class.invalido]="error('dias_vacaciones')" [attr.aria-invalid]="!!error('dias_vacaciones')">
             </div>
+            @if (error('dias_vacaciones'); as mensaje) {
+            <p class="mensaje-error">{{ mensaje }}</p>
+            }
         </div>
 
-        <button type="submit" [disabled]="registroForm.invalid">
-            Crear Cuenta
+        <button type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Creando cuenta...' : 'Crear Cuenta' }}
         </button>
     </form>
 </div>

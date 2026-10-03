@@ -24,6 +24,14 @@
                     <span class="material-icons estrella-icon">star</span>
                     <span class="letras-estrellas">{{ promedioEstrellas() }} / 5</span>
                     <span class="cantidad-reviewss">({{ listaResenas().length }} reseñas)</span>
+                    <div class="clasificacion">
+                        <span class="etiqueta-edad" [class.restringida]="edadMinima() > 0">{{ etiquetaEdad() }}</span>
+                        <span class="texto-edad">{{ descripcionEdad() }}</span>
+                    </div>
+
+                    @if (edadMinima() > 0 && !authService.usuarioActual()) {
+                    <p class="aviso-edad">Para comprar entradas de esta película tenés que iniciar sesión.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -42,7 +50,8 @@
                 <div class="caja-body">
                     <p>Todavía no habilitamos la venta para esta película.</p>
                     @if (fechaInicioPreventa()) {
-                    <p>Las entradas van a estar disponibles a partir del <strong>{{ fechaInicioPreventa() | date:'dd/MM/yyyy' }}</strong>.</p>
+                    <p>Las entradas van a estar disponibles a partir del <strong>{{ fechaInicioPreventa() |
+                            date:'dd/MM/yyyy' }}</strong>.</p>
                     }
                 </div>
             </section>
@@ -103,7 +112,8 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <textarea rows="2" placeholder="¿Qué te pareció?" [ngModel]="nuevoComentario()" (ngModelChange)="nuevoComentario.set($event)"></textarea>
+                            <textarea rows="2" placeholder="¿Qué te pareció?" [ngModel]="nuevoComentario()"
+                                (ngModelChange)="nuevoComentario.set($event)"></textarea>
                         </div>
                         <button class="btn-publicar" (click)="publicarResena()">Publicar</button>
                     </div>

@@ -1,3 +1,156 @@
+:host {
+    display: block;
+    padding: 40px 16px 72px;
+}
+
+.auth-container {
+    --fuente-titulo: "Bodoni 72", Didot, "Playfair Display", Georgia, serif;
+    --error: #ff6b6b;
+
+    position: relative;
+    box-sizing: border-box;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 56px 40px 40px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 80% 160px at 50% 0, color-mix(in srgb, var(--estrellas) 16%, transparent), transparent 75%),
+        color-mix(in srgb, var(--crema) 5%, var(--marron-oscuro));
+    border: 1px solid var(--marron-gris);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    color: var(--crema);
+}
+
+.auth-container::before {
+    content: "";
+    position: absolute;
+    inset: 14px 0 auto 0;
+    height: 6px;
+    background: radial-gradient(circle, var(--estrellas) 2px, transparent 2.5px) 0 0 / 18px 6px repeat-x;
+    opacity: 0.6;
+    pointer-events: none;
+    animation: titilar 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes titilar {
+    from {
+        opacity: 0.25;
+    }
+
+    to {
+        opacity: 0.75;
+    }
+}
+
+.auth-container h2 {
+    margin: 0 0 28px;
+    font-family: var(--fuente-titulo);
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+    line-height: 1.1;
+    text-align: center;
+}
+
+.auth-container h2::before {
+    content: "Tosco Cine";
+    display: block;
+    margin-bottom: 8px;
+    color: var(--estrellas);
+    font-family: system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+}
+
+form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 16px;
+}
+
+.form-group {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.form-group:has(#nombre),
+.form-group:has(#apellido) {
+    grid-column: span 1;
+}
+
+label {
+    color: var(--beige);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 13px 16px;
+    background: color-mix(in srgb, var(--crema) 7%, transparent);
+    border: 1px solid var(--marron-gris);
+    border-radius: 12px;
+    color: var(--crema);
+    font: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input::placeholder {
+    color: var(--verde-suave);
+}
+
+input:hover {
+    border-color: var(--beige);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--estrellas);
+    background: color-mix(in srgb, var(--crema) 10%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--estrellas) 20%, transparent);
+}
+
+input.invalido {
+    border-color: var(--error);
+}
+
+input.invalido:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--error) 22%, transparent);
+}
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--marron-oscuro) inset;
+    -webkit-text-fill-color: var(--crema);
+    caret-color: var(--crema);
+}
+
+.fecha-campos {
+    display: flex;
+    gap: 10px;
+}
+
+.campo-corto,
+.campo-medio {
+    flex: none;
+    text-align: center;
+}
+
+.campo-corto {
+    width: 96px;
+}
+
+.campo-medio {
+    width: 120px;
+}
+
 .chips {
     display: flex;
     flex-wrap: wrap;
@@ -5,45 +158,189 @@
 }
 
 .chips-meses {
-    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    margin-top: 4px;
 }
 
 .chip {
-    padding: 8px 14px;
-    background-color: var(--crema);
-    color: var(--marron-oscuro);
-    border: 1px solid var(--beige);
-    border-radius: 20px;
-    font-weight: bold;
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--crema);
+    border: 1px solid var(--marron-gris);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.chips-meses .chip {
+    padding-inline: 0;
 }
 
 .chip:hover {
-    background-color: var(--beige);
+    border-color: var(--estrellas);
+    background: color-mix(in srgb, var(--estrellas) 10%, transparent);
+}
+
+.chip:active {
+    transform: scale(0.96);
 }
 
 .chip.activo {
-    background-color: var(--marron-claro);
-    color: var(--crema);
-    border-color: var(--marron-oscuro);
+    background: var(--estrellas);
+    border-color: var(--estrellas);
+    color: var(--marron-oscuro);
 }
 
-.fecha-campos {
+.campo-password {
     display: flex;
     gap: 8px;
 }
 
-.campo-corto {
-    width: 80px;
+.campo-password input {
+    flex: 1;
+    min-width: 0;
 }
 
-.campo-medio {
-    width: 110px;
+.btn-ver {
+    padding: 0 16px;
+    background: transparent;
+    color: var(--beige);
+    border: 1px solid var(--marron-gris);
+    border-radius: 12px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.error-fecha {
+.btn-ver:hover {
+    border-color: var(--estrellas);
+    color: var(--estrellas);
+}
+
+.requisitos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 16px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--beige);
+    font-size: 0.85rem;
+}
+
+.requisitos li::before {
+    content: "✗ ";
+    color: var(--error);
+    font-weight: 700;
+}
+
+.requisitos li.cumple {
+    color: var(--verde-suave);
+}
+
+.requisitos li.cumple::before {
+    content: "✓ ";
+    color: var(--verde-suave);
+}
+
+.mensaje-error {
+    margin: 0;
+    color: var(--error);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.banner-error {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--error) 14%, transparent);
+    border: 1px solid var(--error);
+    border-radius: 12px;
+    color: var(--error);
+    font-weight: 600;
+}
+
+button[type="submit"] {
+    grid-column: 1 / -1;
     margin-top: 6px;
-    color: var(--marron-claro);
-    font-weight: bold;
+    padding: 15px 24px;
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--estrellas) 25%, transparent);
+    transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+    background: var(--crema);
+    transform: translateY(-2px);
+}
+
+button[type="submit"]:active:not(:disabled) {
+    transform: none;
+}
+
+button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.chip:focus-visible,
+.btn-ver:focus-visible,
+button[type="submit"]:focus-visible {
+    outline: 2px solid var(--estrellas);
+    outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+    :host {
+        padding: 20px 12px 48px;
+    }
+
+    .auth-container {
+        padding: 48px 20px 28px;
+    }
+
+    form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group:has(#nombre),
+    .form-group:has(#apellido) {
+        grid-column: 1 / -1;
+    }
+
+    .chips-meses {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .requisitos {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-container::before {
+        animation: none;
+    }
+
+    .chip,
+    input,
+    button[type="submit"] {
+        transition: none;
+    }
 }

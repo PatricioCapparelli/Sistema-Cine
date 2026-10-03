@@ -35,9 +35,16 @@ export class Pelicula implements OnInit {
   nuevaCalificacion = signal<number>(5);
   nuevoComentario = signal<string>('');
 
+  descripcionEdad = computed(() =>
+    this.edadMinima() > 0
+      ? `Apta para mayores de ${this.edadMinima()} años`
+      : 'Apta para todo público'
+  );
+  edadMinima = computed(() => this.peliculaInput()?.edad_minima ?? 0);
+  etiquetaEdad = computed(() => (this.edadMinima() > 0 ? `+${this.edadMinima()}` : 'ATP'));
   estado = computed(() => estadoVenta(this.peliculaInput() ?? {}));
   fechaInicioPreventa = computed(() => inicioPreventa(this.peliculaInput() ?? {}));
-  
+
   async ngOnInit() {
     await this.cargarResenas();
   }
