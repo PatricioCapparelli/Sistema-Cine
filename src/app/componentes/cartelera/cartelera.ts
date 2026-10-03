@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal } from '@angular/core'; 
-import { FormsModule } from '@angular/forms'; 
-import { Pelicula } from '../pelicula/pelicula'; 
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Pelicula } from '../pelicula/pelicula';
 import { FuncionesService } from '../../core/services/funciones.service';
-import { PeliculasService } from '../../core/services/peliculas.service'; 
+import { PeliculasService } from '../../core/services/peliculas.service';
 import { RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-cartelera',
   standalone: true,
-  imports: [Pelicula, FormsModule], 
+  imports: [Pelicula, FormsModule],
   styleUrl: './cartelera.css',
   templateUrl: './cartelera.html',
 })
@@ -16,15 +16,15 @@ export class Cartelera implements OnInit {
   private funcionesService = inject(FuncionesService);
   private peliculasService = inject(PeliculasService);
 
-  carteleraAgrupada = signal<any[]>([]); 
+  carteleraAgrupada = signal<any[]>([]);
   cargando = signal(true);
   mostrarTop3 = signal<boolean>(false);
-  carteleraAgrupadaOriginal = signal<any[]>([]); 
+  carteleraAgrupadaOriginal = signal<any[]>([]);
   top3 = signal<any[]>([]);
   terminoBusqueda = signal<string>('');
 
   async ngOnInit() {
-    await this.cargarTop3(); 
+    await this.cargarTop3();
     await this.cargarCartelera();
   }
 
@@ -47,10 +47,10 @@ export class Cartelera implements OnInit {
       const funciones = await this.funcionesService.obtenerFunciones(ahora);
 
       const agrupado = this.agruparPorPelicula(funciones || []);
-      
+
       this.carteleraAgrupada.set(agrupado);
       this.carteleraAgrupadaOriginal.set(agrupado);
-      
+
     } catch (error) {
       console.error('Error cargando la cartelera:', error);
     } finally {
@@ -59,21 +59,23 @@ export class Cartelera implements OnInit {
   }
 
   buscar() {
-    const termino = this.terminoBusqueda().trim().toLowerCase();
-    
+    const termino = this.normalizar(this.terminoBusqueda());
+
     if (!termino) {
       this.carteleraAgrupada.set(this.carteleraAgrupadaOriginal());
       return;
     }
 
-    const resultados = this.carteleraAgrupadaOriginal().filter(item => {
-      const genero = item.pelicula.genero ? item.pelicula.genero.toLowerCase() : '';
-      const nombre = item.pelicula.nombre ? item.pelicula.nombre.toLowerCase() : '';
-      
-      return nombre.includes(termino) || genero.includes(termino);
-    });
-  
+    const resultados = this.carteleraAgrupadaOriginal().filter(item =>
+      this.normalizar(item.pelicula.nombre ?? '').includes(termino) ||
+      this.normalizar(item.pelicula.genero ?? '').includes(termino)
+    );
+
     this.carteleraAgrupada.set(resultados);
+  }
+
+  private normalizar(texto: string): string {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   }
 
   private agruparPorPelicula(funcionesAbiertas: any[]) {
@@ -81,11 +83,11 @@ export class Cartelera implements OnInit {
 
     for (const func of funcionesAbiertas) {
       const idPeli = func.Peliculas.id;
-      
+
       if (!mapa.has(idPeli)) {
         mapa.set(idPeli, { pelicula: func.Peliculas, horarios: [] });
       }
-      
+
       mapa.get(idPeli).horarios.push({
         idFuncion: func.id,
         hora: func.fecha_hora_inicio,

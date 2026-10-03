@@ -2,50 +2,55 @@
     <h2>Identificación</h2>
 
     @if (!mostrarInputAnonimo()) {
-        <form [formGroup]="loginForm" (ngSubmit)="iniciarSesion()">
-            <div class="form-group">
-                <label>Email:</label>
-                <input type="email" formControlName="email" placeholder="tu@email.com">
-            </div>
-
-            <div class="form-group">
-                <label>Contraseña:</label>
-                <input type="password" formControlName="password" placeholder="********">
-            </div>
-
-            <button type="submit" [disabled]="loginForm.invalid" class="btn-ingresar">
-                Ingresar
-            </button>
-        </form>
-
-        <hr class="separador">
-
-        <div class="botones-alternativos">
-            <a routerLink="/registro" class="btn-registro" style="display: block; text-align: center; margin-bottom: 10px;">
-                Registrarse (20% OFF en tu 1° compra)
-            </a>
-
-            <button (click)="mostrarInputAnonimo.set(true)" class="btn-anonimo">
-                Entrar como Anónimo
-            </button>
+    <form [formGroup]="loginForm" (ngSubmit)="iniciarSesion()">
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" formControlName="email" placeholder="tu@email.com">
         </div>
+
+        <div class="form-group">
+            <label>Contraseña:</label>
+            <input type="password" formControlName="password" placeholder="********">
+        </div>
+
+        @if (modoDesarrollo) {
+            <button type="button" class="btn-demo" (click)="rellenarAdmin()">
+                Rellenar como admin (demo)
+            </button>
+            }
+
+        <button type="submit" [disabled]="loginForm.invalid" class="btn-ingresar">
+            Ingresar
+        </button>
+    </form>
+
+    <hr class="separador">
+
+    <div class="botones-alternativos">
+        <a routerLink="/registro" class="btn-registro">
+            Registrarse (20% OFF en tu 1° compra)
+        </a>
+
+        <button (click)="mostrarInputAnonimo.set(true)" class="btn-anonimo">
+            Entrar como Anónimo
+        </button>
+    </div>
 
     } @else {
-        <div class="seccion-anonimo">
-            <h3>Comprar como Invitado</h3>
-            <p>Necesitamos tu email para enviarte los tickets y el código QR.</p>
-            
-            <input type="email" [formControl]="emailAnonimoControl" placeholder="ejemplo@correo.com" style="width: 100%; margin-bottom: 15px; padding: 10px;">
-            
-            <div class="botones-accion" style="display: flex; gap: 10px;">
-                <button (click)="mostrarInputAnonimo.set(false)" class="btn-volver" style="flex: 1;">
-                    Volver
-                </button>
-                
-                <button (click)="continuarComoAnonimo()" [disabled]="emailAnonimoControl.invalid" class="btn-continuar" style="flex: 2;">
-                    Elegir Butacas 
-                </button>
-            </div>
+    <div class="seccion-anonimo">
+        <h3>Comprar como Invitado</h3>
+        <p>Necesitamos tu email para enviarte los tickets y el código QR.</p>
+
+        <input type="email" [formControl]="emailAnonimoControl" placeholder="ejemplo@correo.com">
+        <div class="botones-accion">
+            <button (click)="mostrarInputAnonimo.set(false)" class="btn-volver">
+                Volver
+            </button>
+
+            <button (click)="continuarComoAnonimo()" [disabled]="emailAnonimoControl.invalid" class="btn-continuar">
+                Elegir Butacas
+            </button>
         </div>
+    </div>
     }
 </div>

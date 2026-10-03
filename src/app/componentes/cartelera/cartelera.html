@@ -9,19 +9,17 @@
 
         <div class="barra-busqueda" role="search">
             <svg class="icono-busqueda" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10.5 3a7.5 7.5 0 015.9 12.1l4.3 4.3-1.4 1.4-4.3-4.3A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" />
+                <path
+                    d="M10.5 3a7.5 7.5 0 015.9 12.1l4.3 4.3-1.4 1.4-4.3-4.3A7.5 7.5 0 1110.5 3zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" />
             </svg>
-            <input
-                type="search"
-                aria-label="Buscar por título o género"
-                placeholder="Buscá por título o género"
-                [(ngModel)]="terminoBusqueda"
+            <input type="search" aria-label="Buscar por título o género" placeholder="Buscá por título o género"
+                [ngModel]="terminoBusqueda()" (ngModelChange)="terminoBusqueda.set($event); buscar()"
                 (keyup.enter)="buscar()">
             <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
         </div>
     </header>
 
-    @if (top3().length > 0) {
+    @if (top3().length > 0 && !terminoBusqueda().trim()) {
     <section class="top3-section">
         <div class="header-top3">
             <div>
@@ -72,9 +70,7 @@
         } @else {
         <div class="grilla-peliculas">
             @for (item of carteleraAgrupada(); track item.pelicula.id) {
-            <app-pelicula
-                [peliculaInput]="item.pelicula"
-                [funcionesInput]="item.horarios">
+            <app-pelicula [peliculaInput]="item.pelicula" [funcionesInput]="item.horarios">
             </app-pelicula>
             }
         </div>

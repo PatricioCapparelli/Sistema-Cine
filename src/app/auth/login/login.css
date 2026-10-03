@@ -1,0 +1,289 @@
+:host {
+    display: block;
+    padding: 48px 16px 72px;
+}
+
+.auth-container {
+    --fuente-titulo: "Bodoni 72", Didot, "Playfair Display", Georgia, serif;
+    --error: #ff6b6b;
+
+    position: relative;
+    box-sizing: border-box;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 56px 36px 36px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 80% 160px at 50% 0, color-mix(in srgb, var(--estrellas) 16%, transparent), transparent 75%),
+        color-mix(in srgb, var(--crema) 5%, var(--marron-oscuro));
+    border: 1px solid var(--marron-gris);
+    border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    color: var(--crema);
+}
+
+.auth-container::before {
+    content: "";
+    position: absolute;
+    inset: 14px 0 auto 0;
+    height: 6px;
+    background: radial-gradient(circle, var(--estrellas) 2px, transparent 2.5px) 0 0 / 18px 6px repeat-x;
+    opacity: 0.6;
+    pointer-events: none;
+    animation: titilar 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes titilar {
+    from {
+        opacity: 0.25;
+    }
+
+    to {
+        opacity: 0.75;
+    }
+}
+
+.auth-container h2 {
+    margin: 0 0 28px;
+    font-family: var(--fuente-titulo);
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+    line-height: 1.1;
+    text-align: center;
+}
+
+.auth-container h2::before {
+    content: "Tosco Cine";
+    display: block;
+    margin-bottom: 8px;
+    color: var(--estrellas);
+    font-family: system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+}
+
+form {
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    color: var(--beige);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 13px 16px;
+    background: color-mix(in srgb, var(--crema) 7%, transparent);
+    border: 1px solid var(--marron-gris);
+    border-radius: 12px;
+    color: var(--crema);
+    font: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+input::placeholder {
+    color: var(--verde-suave);
+}
+
+input:hover {
+    border-color: var(--beige);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--estrellas);
+    background: color-mix(in srgb, var(--crema) 10%, transparent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--estrellas) 20%, transparent);
+}
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--marron-oscuro) inset;
+    -webkit-text-fill-color: var(--crema);
+    caret-color: var(--crema);
+}
+
+.btn-ingresar,
+.btn-continuar {
+    padding: 15px 24px;
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--estrellas) 25%, transparent);
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.btn-ingresar:hover:not(:disabled),
+.btn-continuar:hover:not(:disabled) {
+    background: var(--crema);
+    transform: translateY(-2px);
+}
+
+.btn-ingresar:active:not(:disabled),
+.btn-continuar:active:not(:disabled) {
+    transform: none;
+}
+
+.btn-ingresar:disabled,
+.btn-continuar:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-demo {
+    padding: 10px 16px;
+    background: transparent;
+    color: var(--beige);
+    border: 1px dashed var(--marron-gris);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-demo:hover {
+    border-color: var(--estrellas);
+    color: var(--estrellas);
+}
+
+.separador {
+    height: 1px;
+    margin: 28px 0 24px;
+    background: linear-gradient(90deg, transparent, var(--marron-gris), transparent);
+    border: 0;
+}
+
+.botones-alternativos {
+    display: grid;
+    gap: 12px;
+}
+
+.btn-registro,
+.btn-anonimo,
+.btn-volver {
+    padding: 13px 20px;
+    background: transparent;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-registro {
+    display: block;
+    color: var(--estrellas);
+    border: 1px solid var(--estrellas);
+}
+
+.btn-registro:hover {
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+}
+
+.btn-anonimo,
+.btn-volver {
+    color: var(--crema);
+    border: 1px solid var(--marron-gris);
+}
+
+.btn-anonimo:hover,
+.btn-volver:hover {
+    background: color-mix(in srgb, var(--crema) 10%, transparent);
+    border-color: var(--beige);
+}
+
+.seccion-anonimo h3 {
+    margin: 0 0 8px;
+    font-family: var(--fuente-titulo);
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.seccion-anonimo p {
+    margin: 0 0 20px;
+    color: var(--beige);
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.seccion-anonimo input {
+    margin-bottom: 18px;
+}
+
+.botones-accion {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-volver {
+    flex: 1;
+}
+
+.btn-continuar {
+    flex: 2;
+    padding-inline: 12px;
+    font-size: 0.9rem;
+}
+
+.btn-ingresar:focus-visible,
+.btn-continuar:focus-visible,
+.btn-demo:focus-visible,
+.btn-registro:focus-visible,
+.btn-anonimo:focus-visible,
+.btn-volver:focus-visible {
+    outline: 2px solid var(--estrellas);
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    :host {
+        padding: 20px 12px 48px;
+    }
+
+    .auth-container {
+        padding: 48px 20px 28px;
+    }
+
+    .botones-accion {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-container::before {
+        animation: none;
+    }
+
+    input,
+    button,
+    a {
+        transition: none;
+    }
+}
