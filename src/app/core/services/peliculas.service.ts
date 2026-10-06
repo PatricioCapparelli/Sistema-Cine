@@ -26,29 +26,29 @@ export class PeliculasService {
 
     async obtenerTop3Peliculas() {
         const { data, error } = await this.s
-        .from('Peliculas')
-        .select(`
+            .from('Peliculas')
+            .select(`
             id, 
             nombre, 
             imagen_url, 
             genero,
             Funciones (
                 id,
-                Ventas (id)
+                Ventas (id, cancelada)
             )
         `);
 
         if (error) {
             console.error('Error de Supabase trayendo el Top 3:', error.message);
-            return []; 
+            return [];
         }
 
         if (!data) return [];
 
         const peliculasConVentas = data.map((peli: any) => {
-            const funciones = peli.Funciones || []; 
+            const funciones = peli.Funciones || [];
             const totalTickets = funciones.reduce((acc: number, funcion: any) => {
-                const ventas = funcion.Ventas || [];
+                const ventas = (funcion.Ventas || []).filter((v: any) => !v.cancelada);
                 return acc + ventas.length;
             }, 0);
 
@@ -61,7 +61,7 @@ export class PeliculasService {
         const resultadoFinal = peliculasConAlMenosUnaVenta
             .sort((a, b) => b.totalTickets - a.totalTickets)
             .slice(0, 3);
-            
+
         console.log('🏆 Top 3 calculado:', resultadoFinal);
         return resultadoFinal;
     }
@@ -70,7 +70,7 @@ export class PeliculasService {
         const { data, error } = await this.s.from('Peliculas')
             .select('*')
             .ilike('genero', `%${termino}%`);
-            
+
         if (error) throw new Error('Error al filtrar películas');
         return data as IPelicula[];
     }

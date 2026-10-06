@@ -41,6 +41,7 @@
                 <span class="flecha" aria-hidden="true"></span>
             </summary>
             <div class="menu-panel menu-panel-derecha" (click)="menuUsuario.open = false">
+                <a routerLink="/mis-compras">Mis compras <span class="credito-chip">${{ credito.saldo() }}</span></a>
                 <a routerLink="/mis-peliculas">Mis películas</a>
                 <a routerLink="/mis-puntos">Mis puntos</a>
                 <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>

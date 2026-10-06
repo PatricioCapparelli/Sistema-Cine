@@ -76,6 +76,11 @@ export const routes: Routes = [
     path: 'proximamente',
     loadComponent: () => import('./componentes/proximamente/proximamente').then(m => m.ProximamenteComponent)
 },
+{
+    path: 'mis-compras',
+    canActivate: [logueadoGuard],
+    loadComponent: () => import('./componentes/mis-compras/mis-compras').then(m => m.MisComprasComponent)
+},
 
     { path: '', redirectTo: 'cartelera', pathMatch: 'full' },
     { path: '**', redirectTo: 'cartelera' }

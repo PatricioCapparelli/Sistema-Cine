@@ -6,4 +6,5 @@ export interface Venta {
     email_comprador: string;
     monto_total: number;
     butaca_id: string;
+    canje_puntos?: boolean;
 }

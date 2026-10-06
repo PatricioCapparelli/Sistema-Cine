@@ -1,0 +1,137 @@
+.mis-compras {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+    color: var(--crema);
+}
+
+.encabezado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.encabezado h2 {
+    margin: 0;
+}
+
+.tarjeta-credito {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 20px;
+    background: color-mix(in srgb, var(--estrellas) 14%, transparent);
+    border: 1px solid var(--estrellas);
+    border-radius: 14px;
+}
+
+.credito-titulo {
+    color: var(--beige);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.tarjeta-credito strong {
+    color: var(--estrellas);
+    font-size: 1.8rem;
+}
+
+.tarjeta-credito small {
+    color: var(--beige);
+}
+
+.lista-compras {
+    display: grid;
+    gap: 16px;
+}
+
+.compra {
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    background: color-mix(in srgb, var(--crema) 6%, var(--marron-oscuro));
+    border: 1px solid var(--marron-gris);
+    border-radius: 14px;
+}
+
+.compra.cancelada {
+    opacity: 0.55;
+}
+
+.compra img {
+    flex: none;
+    width: 92px;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.compra-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.compra-info h3,
+.compra-info p {
+    margin: 0;
+}
+
+.total {
+    font-weight: 700;
+}
+
+.plazo {
+    color: var(--beige);
+    font-size: 0.9rem;
+}
+
+.estado {
+    padding: 3px 12px;
+    border: 1px solid var(--marron-gris);
+    border-radius: 999px;
+    color: var(--beige);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.estado-cancelada {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.btn-cancelar,
+.btn-reintentar {
+    margin-top: 6px;
+    padding: 8px 18px;
+    background: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-cancelar:hover:not(:disabled),
+.btn-reintentar:hover {
+    background: #ff6b6b;
+    color: var(--marron-oscuro);
+}
+
+.btn-cancelar:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.mensaje-error {
+    color: #ff6b6b;
+    font-weight: 600;
+}

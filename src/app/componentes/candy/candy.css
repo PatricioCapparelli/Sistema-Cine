@@ -277,3 +277,47 @@
         position: static;
     }
 }
+
+.bloque-credito {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: color-mix(in srgb, var(--estrellas) 18%, var(--beige));
+    border-radius: 8px;
+}
+
+.usar-credito {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.aviso-vip {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--estrellas) 22%, var(--crema));
+    border-left: 3px solid var(--estrellas);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.es-vip {
+    color: var(--marron-claro);
+    font-weight: 700;
+}
+
+.nota-combos {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--estrellas) 18%, transparent);
+    border-left: 3px solid var(--estrellas);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.btn-agregar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

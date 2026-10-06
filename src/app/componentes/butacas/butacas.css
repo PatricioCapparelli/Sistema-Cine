@@ -139,3 +139,105 @@
 .btn-pagar:hover {
     background-color: var(--marron-oscuro);
 }
+
+.butaca.vip.libre {
+    background: var(--marron-oscuro);
+    color: var(--estrellas);
+    border: 2px solid var(--estrellas);
+}
+
+.butaca.vip.libre:hover {
+    background: color-mix(in srgb, var(--estrellas) 25%, var(--marron-oscuro));
+}
+
+.butaca.vip.seleccionada {
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+    border: 2px solid var(--crema);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--estrellas) 35%, transparent);
+}
+
+.zona-vip {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 14px 0 4px;
+    color: var(--estrellas);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.zona-vip::before,
+.zona-vip::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--estrellas), transparent);
+}
+
+.leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 20px;
+    margin: 0 0 24px;
+    padding: 0;
+    list-style: none;
+    color: var(--beige);
+    font-size: 0.85rem;
+}
+
+.leyenda li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.muestra {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--beige);
+    border-radius: 5px 5px 3px 3px;
+}
+
+.muestra.libre {
+    background: var(--crema);
+}
+
+.muestra.seleccionada {
+    background: var(--marron-claro);
+    border-color: var(--marron-oscuro);
+}
+
+.muestra.ocupada {
+    background: var(--marron-gris);
+    border-color: var(--marron-gris);
+    opacity: 0.5;
+}
+
+.muestra.accesible {
+    background: var(--verde-suave);
+    border: 2px solid var(--estrellas);
+}
+
+.muestra.vip {
+    background: var(--marron-oscuro);
+    border: 2px solid var(--estrellas);
+}
+
+.aviso-vip {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--estrellas) 18%, transparent);
+    border-left: 3px solid var(--estrellas);
+    border-radius: 6px;
+    color: var(--marron-oscuro);
+    font-weight: 700;
+}
+
+.es-vip {
+    color: var(--marron-claro);
+}

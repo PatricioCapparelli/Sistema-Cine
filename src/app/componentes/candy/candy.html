@@ -11,14 +11,16 @@
                     <span class="etiqueta-destacado">Destacado</span>
                     }
                     @if (combo.imagen_url) {
-                    <img [src]="combo.imagen_url" [alt]="combo.nombre" class="img-producto bg-white">
+                    <img [src]="combo.imagen_url" [alt]="combo.nombre" class="img-producto bg-white" loading="lazy">
                     }
                     <div class="card-body">
                         <h3>{{ combo.nombre }}</h3>
                         <p class="desc"><strong>{{ combo.descripcion }}</strong></p>
                         <div class="info-precio">
                             <span class="precio precio-combo">${{ combo.precio }}</span>
-                            <button type="button" class="btn-agregar btn-combo" (click)="agregarCombo(combo)">
+                            <button type="button" class="btn-agregar btn-combo"
+                                [disabled]="!hayPromoDisponible()"
+                                (click)="agregarCombo(combo)">
                                 Agregar
                             </button>
                         </div>
@@ -33,13 +35,13 @@
         <div class="grilla-candy">
             @for (producto of productosDisponibles(); track producto.id) {
             <div class="card-producto">
-                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto">
+                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="img-producto" loading="lazy">
                 <div class="card-body">
                     <h3>{{ producto.nombre }}</h3>
                     <p class="desc">{{ producto.descripcion }}</p>
                     <div class="info-precio">
                         <span class="precio">${{ producto.precio }}</span>
-                        <button type="button" class="btn-agregar" (click)="agregar(producto)"> Agregar</button>
+                        <button type="button" class="btn-agregar" (click)="agregar(producto)">Agregar</button>
                     </div>
                 </div>
             </div>
@@ -60,8 +62,8 @@
 
                 @if (costoPuntosPorEntrada() > 0) {
                 <button type="button" class="btn-secundario btn-puntos"
-                        (click)="aplicarEntradaGratis()"
-                        [disabled]="!puedeCanjear()">
+                    [disabled]="!puedeCanjear()"
+                    (click)="aplicarEntradaGratis()">
                     Canjear Entrada ({{ costoPuntosPorEntrada() }} pts)
                 </button>
                 }
@@ -73,6 +75,18 @@
                 </p>
                 }
             </div>
+
+            @if (creditoDisponible() > 0) {
+            <div class="detalle-bloque bloque-credito">
+                <h4>Crédito disponible</h4>
+                <p>Tenés <strong>${{ creditoDisponible() }}</strong> de crédito.</p>
+                <label class="usar-credito">
+                    <input type="checkbox" [checked]="usarCredito()"
+                        (change)="usarCredito.set($any($event.target).checked)">
+                    Usar mi crédito en esta compra
+                </label>
+            </div>
+            }
             }
 
             <div class="detalle-bloque">
@@ -81,9 +95,18 @@
                 <p>{{ reservaService.detalleFuncion()?.horario }}</p>
                 <p>Butacas:
                     @for (b of reservaService.butacasSeleccionadas(); track b.id) {
-                    <span>{{ b.id }} </span>
+                    <span [class.es-vip]="b.tipo === 'vip'">{{ b.id }}{{ b.tipo === 'vip' ? ' (VIP)' : '' }} </span>
                     }
                 </p>
+
+                @if (cantidadVip() > 0) {
+                <div class="aviso-vip">
+                    <strong>Butacas VIP:</strong> {{ idsVip() }}<br>
+                    {{ cantidadVip() }} × ${{ precioVip() }} (incluye ${{ recargoVip() }} de recargo VIP).
+                    El recargo se cobra siempre, también con combos o canjes de puntos.
+                </div>
+                }
+
                 <p class="subtotal">Subtotal Entradas: ${{ totalEntradas() }}</p>
             </div>
 
@@ -119,9 +142,20 @@
 
             <hr class="divisor-fuerte">
             <div class="total-final">
-                <span>Total a Pagar:</span>
+                <span>Total:</span>
                 <span>${{ granTotal() }}</span>
             </div>
+
+            @if (creditoAplicado() > 0) {
+            <div class="item-carrito">
+                <span>Crédito aplicado</span>
+                <span>-${{ creditoAplicado() }}</span>
+            </div>
+            <div class="total-final">
+                <span>A pagar:</span>
+                <span>${{ aPagar() }}</span>
+            </div>
+            }
 
             <button type="button" class="btn-comprar-final" [disabled]="comprando()" (click)="confirmarCompraFinal()">
                 {{ comprando() ? 'Procesando...' : 'Confirmar y Pagar' }}

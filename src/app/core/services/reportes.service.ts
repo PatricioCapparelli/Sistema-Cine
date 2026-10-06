@@ -19,6 +19,7 @@ export class ReportesService {
             const { data, error } = await this.s.from('Ventas')
                 .select('created_at, monto_total')
                 .gte('created_at', desde.toISOString())
+                .eq('cancelada', false)
                 .order('created_at', { ascending: true })
                 .order('id', { ascending: true })
                 .range(inicio, inicio + this.TAMANO_PAGINA - 1);

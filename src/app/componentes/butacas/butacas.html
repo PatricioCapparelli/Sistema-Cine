@@ -1,47 +1,68 @@
 <div class="contenedor-sala">
     <div class="pantalla">PANTALLA</div>
 
-    <div class="grilla">
-        @for (fila of matrizSala(); track $index) {
-        <div class="fila-butacas">
-    <div class="letra-fila">{{ fila[0].tipo === 'accesible' ? '♿' : fila[0].fila }}</div>
+    <ul class="leyenda">
+        <li><span class="muestra libre"></span>Libre</li>
+        <li><span class="muestra seleccionada"></span>Elegida</li>
+        <li><span class="muestra ocupada"></span>Ocupada</li>
+        <li><span class="muestra accesible"></span>Accesible</li>
+        <li><span class="muestra vip"></span>VIP (+${{ precios.recargoVip() }})</li>
+    </ul>
 
-    @for (seccion of seccionesDe(fila); track $index) {
-    <div class="bloque">
-        @for (butaca of seccion; track butaca.id) {
-        <button class="butaca"
-            [class.libre]="butaca.estado === 'libre'"
-            [class.seleccionada]="butaca.estado === 'seleccionada'"
-            [class.ocupada]="butaca.estado === 'ocupada'"
-            [class.accesible]="butaca.tipo === 'accesible'"
-            [class.bloqueada]="butaca.estado === 'bloqueada'"
-            (click)="seleccionarButaca(butaca)">
-            {{ butaca.numero }}
-        </button>
+    <div class="grilla">
+        @for (fila of matrizSala(); track fila[0].fila) {
+        @if (esInicioZonaVip(fila)) {
+        <div class="zona-vip">Zona VIP · ${{ precioVip() }} por butaca</div>
         }
-    </div>
-    @if (!$last) {
-    <div class="pasillo"></div>
-    }
-    }
-</div>
+
+        <div class="fila-butacas">
+            <div class="letra-fila">{{ fila[0].tipo === 'accesible' ? '♿' : fila[0].fila }}</div>
+
+            @for (seccion of seccionesDe(fila); track $index) {
+            <div class="bloque">
+                @for (butaca of seccion; track butaca.id) {
+                <button type="button" class="butaca"
+                    [class.libre]="butaca.estado === 'libre'"
+                    [class.seleccionada]="butaca.estado === 'seleccionada'"
+                    [class.ocupada]="butaca.estado === 'ocupada'"
+                    [class.bloqueada]="butaca.estado === 'bloqueada'"
+                    [class.accesible]="butaca.tipo === 'accesible'"
+                    [class.vip]="butaca.tipo === 'vip'"
+                    [attr.aria-label]="'Butaca ' + butaca.id + (butaca.tipo === 'vip' ? ' VIP' : '') + ', ' + butaca.estado"
+                    (click)="seleccionarButaca(butaca)">
+                    {{ butaca.numero }}
+                </button>
+                }
+            </div>
+            @if (!$last) {
+            <div class="pasillo"></div>
+            }
+            }
+        </div>
         }
     </div>
 
     @if (cantidadSeleccionadas() > 0) {
-        <div class="resumen-compra">
-            <h3>Asientos seleccionados: {{ cantidadSeleccionadas() }}</h3>
-            
-            <p class="detalle-butacas">
-                Butacas: 
-                @for (b of butacasSeleccionadas(); track b.id) {
-                    <strong>{{ b.id }} </strong>
-                }
-            </p>
-            
-            <button class="btn-pagar" (click)="continuarACandy()">
-                Siguiente: Candy Bar 
-            </button>
-        </div>
+    <div class="resumen-compra">
+        <h3>Asientos seleccionados: {{ cantidadSeleccionadas() }}</h3>
+
+        <p class="detalle-butacas">
+            Butacas:
+            @for (b of butacasSeleccionadas(); track b.id) {
+            <strong [class.es-vip]="b.tipo === 'vip'">{{ b.id }}{{ b.tipo === 'vip' ? ' (VIP)' : '' }} </strong>
+            }
+        </p>
+
+        @if (cantidadVip() > 0) {
+        <p class="aviso-vip">
+            Incluye {{ cantidadVip() }} {{ cantidadVip() === 1 ? 'butaca VIP' : 'butacas VIP' }}:
+            +${{ recargoVipSeleccionado() }} sobre el precio común.
+        </p>
+        }
+
+        <button type="button" class="btn-pagar" (click)="continuarACandy()">
+            Siguiente: Candy Bar
+        </button>
+    </div>
     }
 </div>

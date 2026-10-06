@@ -354,3 +354,13 @@ summary:focus-visible {
         transition: none;
     }
 }
+
+.credito-chip {
+    margin-left: 6px;
+    padding: 1px 8px;
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+}

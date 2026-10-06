@@ -3,5 +3,5 @@ export interface Butaca {
     fila: string;
     numero: number;
     estado: 'libre' | 'seleccionada' | 'ocupada' | 'bloqueada';
-    tipo?: 'normal' | 'accesible';
+    tipo?: 'normal' | 'accesible' | 'vip';
 }

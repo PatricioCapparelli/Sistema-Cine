@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../core/services/auth.service';
+import { CreditoService } from '../../core/services/credito.service';
 
 
 @Component({
@@ -13,6 +14,7 @@ import { Auth } from '../../core/services/auth.service';
 export class NavbarComponent {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   public authS = inject(Auth);
+  credito = inject(CreditoService);
 
   @HostListener('document:click', ['$event'])
   cerrarMenus(evento: Event) {

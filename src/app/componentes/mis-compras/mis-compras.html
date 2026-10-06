@@ -1,0 +1,47 @@
+<div class="mis-compras">
+    <header class="encabezado">
+        <h2>Mis compras</h2>
+        <div class="tarjeta-credito">
+            <span class="credito-titulo">Crédito disponible</span>
+            <strong>${{ saldo() }}</strong>
+            <small>Se usa en tu próxima compra, junto con otros medios de pago.</small>
+        </div>
+    </header>
+
+    @if (cargando()) {
+    <p>Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje-error">No se pudieron cargar tus compras. <button type="button" class="btn-reintentar" (click)="cargar()">Reintentar</button></p>
+    } @else {
+    <div class="lista-compras">
+        @for (c of compras(); track c.venta_id) {
+        <article class="compra" [class.cancelada]="c.cancelada">
+            @if (c.imagen_url) {
+            <img [src]="c.imagen_url" [alt]="c.pelicula" loading="lazy">
+            }
+            <div class="compra-info">
+                <h3>{{ c.pelicula }}</h3>
+                <p>{{ c.funcion_inicio | date: 'dd/MM/yyyy HH:mm' }}</p>
+                <p>Butacas: {{ c.butacas }}</p>
+                <p class="total">Total: ${{ c.total }}</p>
+
+                @if (c.cancelada) {
+                <span class="estado estado-cancelada">Cancelada</span>
+                } @else if (c.usada) {
+                <span class="estado estado-usada">Entrada utilizada</span>
+                } @else if (c.puede_cancelar) {
+                <p class="plazo">Podés cancelar hasta el {{ limite(c) | date: 'dd/MM HH:mm' }}</p>
+                <button type="button" class="btn-cancelar" [disabled]="cancelando() === c.venta_id" (click)="cancelar(c)">
+                    {{ cancelando() === c.venta_id ? 'Cancelando...' : 'Cancelar compra' }}
+                </button>
+                } @else {
+                <span class="estado">Ya no se puede cancelar</span>
+                }
+            </div>
+        </article>
+        } @empty {
+        <p>Todavía no hiciste compras.</p>
+        }
+    </div>
+    }
+</div>

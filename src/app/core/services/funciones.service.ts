@@ -150,21 +150,23 @@ export class FuncionesService {
         return data || [];
     }
 
-    suscribirseAVentas(funcionId: string, alNuevaVenta: (butacaId: string) => void): RealtimeChannel {
+    suscribirseAVentas(
+        funcionId: string,
+        alNuevaVenta: (butacaId: string) => void,
+        alLiberar?: (butacaId: string) => void
+    ): RealtimeChannel {
+        const filtro = `funcion_id=eq.${funcionId}`;
+
         return this.s
             .channel(`ventas-funcion-${funcionId}`)
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'Ventas' },
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Ventas', filter: filtro },
+                (payload) => alNuevaVenta((payload.new as any).butaca_id))
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Ventas', filter: filtro },
                 (payload) => {
-                    console.log('realtime venta', payload);
-                    const nueva = payload.new as any;
-                    if (String(nueva.funcion_id) === String(funcionId)) {
-                        alNuevaVenta(nueva.butaca_id);
-                    }
-                }
-            )
-            .subscribe((status, err) => console.log('realtime estado:', status, err));
+                    const venta = payload.new as any;
+                    if (venta.cancelada) alLiberar?.(venta.butaca_id);
+                })
+            .subscribe();
     }
 
     quitarSuscripcion(canal: RealtimeChannel): void {
@@ -185,29 +187,31 @@ export class FuncionesService {
         return data;
     }
 
-    async registrarCompra(ventas: Venta[], entradasGratis: number): Promise<any[]> {
-    const { data, error } = await this.s.rpc('registrar_compra', {
-        p_ventas: ventas,
-        p_entradas_gratis: entradasGratis
-    });
+    async registrarCompra(ventas: Venta[], entradasGratis: number, credito = 0): Promise<any[]> {
+        const { data, error } = await this.s.rpc('registrar_compra', {
+            p_ventas: ventas,
+            p_entradas_gratis: entradasGratis,
+            p_credito: credito
+        });
 
-    if (error) {
-        console.error('Error de Supabase al registrar la compra:', error);
-        if (error.code === '23505') throw new Error('BUTACA_YA_VENDIDA');
-        if (error.message.includes('VENTA_NO_DISPONIBLE')) throw new Error('VENTA_NO_DISPONIBLE');
-        if (error.message.includes('PUNTOS_INSUFICIENTES')) throw new Error('PUNTOS_INSUFICIENTES');
-        throw new Error('Error al registrar la compra');
+        if (error) {
+            console.error('Error de Supabase al registrar la compra:', error);
+            if (error.code === '23505') throw new Error('BUTACA_YA_VENDIDA');
+            if (error.message.includes('PUNTOS_INSUFICIENTES')) throw new Error('PUNTOS_INSUFICIENTES');
+            if (error.message.includes('CREDITO_INSUFICIENTE')) throw new Error('CREDITO_INSUFICIENTE');
+            if (error.message.includes('VENTA_NO_DISPONIBLE')) throw new Error('VENTA_NO_DISPONIBLE');
+            if (error.message.includes('PRECIO_INVALIDO') || error.message.includes('COMBO_INVALIDO')) throw new Error('PRECIO_INVALIDO');
+            throw new Error('Error al registrar la compra');
+        }
+
+        return data as any[];
     }
-
-    return data as any[];
-}
-
     async validarTicketEscaneado(codigo: string) {
         const esUUID = codigo.length > 10;
         const codigoLimpio = esUUID ? codigo : codigo.toUpperCase().trim();
 
         let query = this.s.from('Ventas')
-            .select('id, entrada_usada, butaca_id, codigo_manual, Funciones(Peliculas(nombre))');
+            .select('id, entrada_usada, butaca_id, codigo_manual, Funciones(Peliculas(nombre)), cancelada');
 
         query = esUUID
             ? query.eq('id', codigoLimpio)
@@ -222,6 +226,10 @@ export class FuncionesService {
 
         if (!ticket) {
             throw new Error(`No se encontro el codigo: "${codigoLimpio}".`);
+        }
+
+        if (ticket.cancelada) {
+            throw new Error('ALERTA! Este ticket fue cancelado y no es válido.');
         }
 
         if (ticket.entrada_usada) {
@@ -241,7 +249,7 @@ export class FuncionesService {
             .eq('id_ticket', ticket.id);
 
         return {
-            mensaje: `Ticket Valido. Pase a Butaca ${ticket.butaca_id}`,
+            mensaje: `Ticket Valido. Pase a Butaca ${ticket.butaca_id}${/^[RST]-/.test(ticket.butaca_id) ? ' (VIP)' : ''}`,
             pelicula: (ticket.Funciones as any)?.Peliculas?.nombre || 'Pelicula desconocida',
             candy: candy || []
         };

@@ -2,22 +2,32 @@ import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular
 import { Router, RouterLink } from '@angular/router';
 import { CandyService } from '../../core/services/candy.service';
 import { CombosService } from '../../core/services/combos.service';
+import { CreditoService } from '../../core/services/credito.service';
 import { FidelizacionService } from '../../core/services/fidelizacion.service';
 import { FuncionesService } from '../../core/services/funciones.service';
 import { LoadingService } from '../../core/services/loading.service';
+import { PreciosService } from '../../core/services/precio.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { SalaEnVivoService } from '../../core/services/sala-en-vivo.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { Ticket } from '../../core/services/ticket.service';
 import { Auth } from '../../core/services/auth.service';
 import { IProductoCandy } from '../../core/interfaces/Candy';
+import { ICombo } from '../../core/interfaces/Combo';
 import { Venta } from '../../core/interfaces/Venta';
 import { Butaca } from '../../core/interfaces/Butaca';
-import { ICombo } from '../../core/interfaces/Combo';
 
 interface TicketCreado {
   id: string;
   codigo_manual: string;
+}
+
+interface LineaEntrada {
+  butaca: Butaca;
+  combo: ICombo | null;
+  canje: boolean;
+  entrada: number;
+  monto: number;
 }
 
 @Component({
@@ -30,6 +40,7 @@ interface TicketCreado {
 export class Candy implements OnInit, OnDestroy {
   private candyService = inject(CandyService);
   private combosService = inject(CombosService);
+  private creditoService = inject(CreditoService);
   private fidelizacion = inject(FidelizacionService);
   private funcionesService = inject(FuncionesService);
   private ticketService = inject(Ticket);
@@ -37,6 +48,7 @@ export class Candy implements OnInit, OnDestroy {
   private salaEnVivo = inject(SalaEnVivoService);
   private sesionCompra = inject(SesionCompraService);
   private router = inject(Router);
+  private precioService = inject(PreciosService);
   public reservaService = inject(ReservaService);
   public authService = inject(Auth);
 
@@ -48,29 +60,83 @@ export class Candy implements OnInit, OnDestroy {
   combosAplicados = signal<ICombo[]>([]);
   entradasGratisAplicadas = signal(0);
   costoPuntosPorEntrada = signal(0);
+  usarCredito = signal(false);
+  creditoDisponible = this.creditoService.saldo;
+  recargoVip = this.precioService.recargoVip;
 
-  // Acá traemos el precio calculado que viene desde Butacas (preventa o normal)
-  private precioEntrada = computed(() => this.reservaService.detalleFuncion()?.precioEntrada ?? this.sesionCompra.precioBaseEntrada);
+  private precioEntrada = computed(() =>
+    this.reservaService.detalleFuncion()?.precioEntrada ?? this.precioService.precioBase()
+  );
 
   private cantidadButacas = computed(() => this.reservaService.butacasSeleccionadas().length);
   private entradasConPromo = computed(() => this.entradasGratisAplicadas() + this.combosAplicados().length);
 
+  butacasVip = computed(() => this.reservaService.butacasSeleccionadas().filter(b => b.tipo === 'vip'));
+  cantidadVip = computed(() => this.butacasVip().length);
+  idsVip = computed(() => this.butacasVip().map(b => b.id).join(', '));
+  precioVip = computed(() => this.precioEntrada() + this.recargoVip());
+
+  hayPromoDisponible = computed(() => this.entradasConPromo() < this.cantidadButacas());
+
+  private lineas = computed<LineaEntrada[]>(() => {
+    const butacas = this.reservaService.butacasSeleccionadas();
+    const recargo = this.recargoVip();
+    const descuento = this.sesionCompra.descuentoAplicado();
+    const precioBase = this.precioEntrada();
+
+    const orden = butacas
+      .map((butaca, indice) => ({ butaca, indice }))
+      .sort((a, b) => Number(a.butaca.tipo === 'vip') - Number(b.butaca.tipo === 'vip') || a.indice - b.indice);
+
+    let canjesPendientes = this.entradasGratisAplicadas();
+    const combosPendientes = [...this.combosAplicados()];
+    const lineas = new Array<LineaEntrada>(butacas.length);
+
+    for (const { butaca, indice } of orden) {
+      const extra = butaca.tipo === 'vip' ? recargo : 0;
+      let combo: ICombo | null = null;
+      let canje = false;
+      let entrada: number;
+      let monto: number;
+
+      if (canjesPendientes > 0) {
+        canjesPendientes--;
+        canje = true;
+        entrada = extra;
+        monto = extra;
+      } else if (combosPendientes.length > 0) {
+        combo = combosPendientes.shift()!;
+        entrada = extra;
+        monto = combo.precio + extra;
+      } else {
+        const lista = precioBase + extra;
+        entrada = this.redondear(lista - lista * (descuento / 100));
+        monto = entrada;
+      }
+
+      lineas[indice] = { butaca, combo, canje, entrada, monto };
+    }
+
+    return lineas;
+  });
+
   saldoPuntos = computed(() => this.saldoReal() - this.entradasGratisAplicadas() * this.costoPuntosPorEntrada());
 
-  totalEntradas = computed(() => {
-    const regulares = Math.max(0, this.cantidadButacas() - this.entradasConPromo());
-    const precioBruto = regulares * this.precioEntrada(); // Usamos el precio dinámico
-    const descuento = this.sesionCompra.descuentoAplicado();
-    return precioBruto - precioBruto * (descuento / 100);
-  });
+  totalEntradas = computed(() => this.redondear(this.lineas().reduce((acc, linea) => acc + linea.entrada, 0)));
 
   totalCombos = computed(() => this.combosAplicados().reduce((acc, combo) => acc + combo.precio, 0));
 
-  granTotal = computed(() => this.totalEntradas() + this.totalCombos() + this.reservaService.totalCandy());
+  granTotal = computed(() => this.redondear(this.totalEntradas() + this.totalCombos() + this.reservaService.totalCandy()));
+
+  creditoAplicado = computed(() =>
+    this.usarCredito() ? this.redondear(Math.min(this.creditoDisponible(), this.granTotal())) : 0
+  );
+
+  aPagar = computed(() => Math.max(0, this.redondear(this.granTotal() - this.creditoAplicado())));
 
   puedeCanjear = computed(() => {
     const costo = this.costoPuntosPorEntrada();
-    return costo > 0 && this.saldoPuntos() >= costo && this.haySinPromo();
+    return costo > 0 && this.saldoPuntos() >= costo && this.hayPromoDisponible();
   });
 
   async ngOnInit() {
@@ -81,7 +147,12 @@ export class Candy implements OnInit, OnDestroy {
 
     this.loadingService.mostrar();
     try {
-      await Promise.all([this.cargarProductos(), this.cargarCombos(), this.cargarPuntos()]);
+      await Promise.all([
+        this.precioService.cargar(),
+        this.cargarProductos(),
+        this.cargarCombos(),
+        this.cargarPuntos()
+      ]);
     } finally {
       this.loadingService.ocultar();
     }
@@ -96,7 +167,7 @@ export class Candy implements OnInit, OnDestroy {
   }
 
   agregarCombo(combo: ICombo) {
-    if (!this.haySinPromo()) {
+    if (!this.hayPromoDisponible()) {
       alert('Ya aplicaste promociones o combos a todas tus butacas.');
       return;
     }
@@ -113,7 +184,7 @@ export class Candy implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.haySinPromo()) {
+    if (!this.hayPromoDisponible()) {
       alert('Ya aplicaste promociones o combos a todas tus butacas.');
       return;
     }
@@ -141,13 +212,17 @@ export class Candy implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.confirmarButacasVip()) return;
+
     this.comprando.set(true);
     this.loadingService.mostrar();
     try {
       const ventas = await this.funcionesService.registrarCompra(
-        this.construirVentas(idFunc, butacas),
-        this.entradasGratisAplicadas()
+        this.construirVentas(idFunc),
+        this.entradasGratisAplicadas(),
+        this.creditoAplicado()
       );
+      this.creditoService.cargarSaldo();
 
       const fallidos = await this.completarCompra(ventas[0], butacas);
       this.avisarResultado(ventas[0].codigo_manual, fallidos);
@@ -162,8 +237,18 @@ export class Candy implements OnInit, OnDestroy {
     }
   }
 
-  private haySinPromo(): boolean {
-    return this.entradasConPromo() < this.cantidadButacas();
+  private redondear(valor: number): number {
+    return Math.round(valor * 100) / 100;
+  }
+
+  private confirmarButacasVip(): boolean {
+    const cantidad = this.cantidadVip();
+    if (cantidad === 0) return true;
+
+    const etiqueta = cantidad === 1 ? 'butaca VIP' : 'butacas VIP';
+    const recargo = cantidad * this.recargoVip();
+
+    return confirm(`Tu compra incluye ${cantidad} ${etiqueta} (${this.idsVip()}) con un recargo de $${recargo}, que se cobra también si usás combos o canjes de puntos. ¿Querés continuar?`);
   }
 
   private async cargarProductos() {
@@ -199,29 +284,20 @@ export class Candy implements OnInit, OnDestroy {
     }
   }
 
-  private construirVentas(idFuncion: string, butacas: Butaca[]): Venta[] {
+  private construirVentas(idFuncion: string): Venta[] {
     const usuarioId = this.authService.usuarioActual()?.id ?? null;
     const email = this.sesionCompra.emailComprador();
-    const gratis = this.entradasGratisAplicadas();
-    const combos = this.combosAplicados();
 
-    const precioBase = this.precioEntrada(); // Usamos el precio dinámico
-    const precioRegular = precioBase - precioBase * (this.sesionCompra.descuentoAplicado() / 100);
-
-    return butacas.map((butaca, indice) => {
-      const combo = indice >= gratis ? combos[indice - gratis] : undefined;
-      const monto = indice < gratis ? 0 : combo ? combo.precio : precioRegular;
-
-      return {
-        funcion_id: idFuncion,
-        usuario_id: usuarioId,
-        email_comprador: email,
-        monto_total: monto,
-        butaca_id: butaca.id,
-        codigo_manual: this.generarCodigoManual(),
-        combo_id: combo?.id ?? null
-      };
-    });
+    return this.lineas().map(linea => ({
+      funcion_id: idFuncion,
+      usuario_id: usuarioId,
+      email_comprador: email,
+      monto_total: linea.monto,
+      butaca_id: linea.butaca.id,
+      codigo_manual: this.generarCodigoManual(),
+      combo_id: linea.combo?.id ?? null,
+      canje_puntos: linea.canje
+    }));
   }
 
   private async completarCompra(ticket: TicketCreado, butacas: Butaca[]): Promise<string[]> {
@@ -257,13 +333,6 @@ export class Candy implements OnInit, OnDestroy {
   private async manejarErrorCompra(error: any, idFuncion: string) {
     console.error('Error procesando la compra final:', error);
 
-    // Acá sumamos el error del Trigger
-    if (error?.message?.includes('VENTA_NO_DISPONIBLE') || error === 'VENTA_NO_DISPONIBLE') {
-      alert('Las entradas de esta película todavía no están a la venta.');
-      this.router.navigate(['/cartelera']);
-      return;
-    }
-
     switch (error?.message) {
       case 'BUTACA_YA_VENDIDA':
         alert('Alguna de tus butacas acaba de ser comprada por otra persona. Volvé a elegir tus asientos.');
@@ -274,6 +343,21 @@ export class Candy implements OnInit, OnDestroy {
         alert('Ya no tenés puntos suficientes para las entradas canjeadas. Revisá tu saldo e intentá de nuevo.');
         this.entradasGratisAplicadas.set(0);
         await this.cargarPuntos();
+        break;
+      case 'CREDITO_INSUFICIENTE':
+        alert('Tu crédito cambió y ya no alcanza. Revisalo e intentá de nuevo.');
+        this.usarCredito.set(false);
+        await this.creditoService.cargarSaldo();
+        break;
+      case 'VENTA_NO_DISPONIBLE':
+        alert('Las entradas de esta película todavía no están a la venta.');
+        this.router.navigate(['/cartelera']);
+        break;
+      case 'PRECIO_INVALIDO':
+        alert('Los precios cambiaron mientras comprabas. Volvé a elegir tus butacas.');
+        await this.precioService.cargar(true);
+        this.reservaService.butacasSeleccionadas.set([]);
+        this.router.navigate(['/comprar', idFuncion]);
         break;
       default:
         alert('Hubo un error al procesar tu compra. Revisa la consola.');

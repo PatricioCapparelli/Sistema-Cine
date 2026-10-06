@@ -6,8 +6,18 @@ import { ReservaService } from '../../core/services/reserva.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { Auth } from '../../core/services/auth.service';
 import { SalaEnVivoService } from '../../core/services/sala-en-vivo.service';
+import { PreciosService } from '../../core/services/precio.service';
 import { Butaca } from '../../core/interfaces/Butaca';
 import { precioEntrada, estadoVenta } from '../../core/utils/venta-pelicula/venta-pelicula';
+
+interface DetalleFuncion {
+  pelicula: string;
+  horario: string;
+  sala: string;
+  edadMinima: number;
+  precioEntrada: number;
+  enVenta: boolean;
+}
 
 @Component({
   selector: 'app-butacas',
@@ -23,8 +33,10 @@ export class Butacas implements OnInit, OnDestroy {
   private sesionCompra = inject(SesionCompraService);
   private authService = inject(Auth);
   private salaEnVivo = inject(SalaEnVivoService);
+  public precios = inject(PreciosService);
 
   private readonly FILAS_LETRAS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'ACC', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+  private readonly FILAS_VIP = ['R', 'S', 'T'];
   private readonly FILA_ACCESIBLE = 'ACC';
   private readonly SECCIONES_ACCESIBLES = [2, 10, 2];
   private readonly COLUMNAS = 28;
@@ -35,11 +47,13 @@ export class Butacas implements OnInit, OnDestroy {
   matrizSala = signal<Butaca[][]>([]);
   butacasSeleccionadas = signal<Butaca[]>([]);
   idFuncion = signal<string | null>(null);
-  
-  // Agregamos precioEntrada y enVenta a la interfaz de la señal
-  detalleFuncion = signal<{ pelicula: string; horario: string; sala: string; edadMinima: number; precioEntrada?: number; enVenta?: boolean; } | null>(null);
+  detalleFuncion = signal<DetalleFuncion | null>(null);
 
   cantidadSeleccionadas = computed(() => this.butacasSeleccionadas().length);
+  cantidadVip = computed(() => this.butacasSeleccionadas().filter(b => b.tipo === 'vip').length);
+  recargoVipSeleccionado = computed(() => this.cantidadVip() * this.precios.recargoVip());
+  precioComun = computed(() => this.detalleFuncion()?.precioEntrada ?? this.precios.precioBase());
+  precioVip = computed(() => this.precioComun() + this.precios.recargoVip());
 
   constructor() {
     effect(() => {
@@ -58,7 +72,11 @@ export class Butacas implements OnInit, OnDestroy {
 
     const id = this.idFuncion();
     if (id) {
-      this.canalVentas = this.funcionesService.suscribirseAVentas(id, (butacaId) => this.marcarOcupada(butacaId));
+      this.canalVentas = this.funcionesService.suscribirseAVentas(
+        id,
+        (butacaId) => this.marcarOcupada(butacaId),
+        (butacaId) => this.liberarButaca(butacaId)
+      );
       this.salaEnVivo.conectar(id);
       this.publicarSeleccion();
     }
@@ -74,6 +92,10 @@ export class Butacas implements OnInit, OnDestroy {
   seccionesDe(fila: Butaca[]): Butaca[][] {
     const cortes = fila[0]?.tipo === 'accesible' ? [0, 2, 12, 14] : [0, 4, 24, 28];
     return [0, 1, 2].map(i => fila.slice(cortes[i], cortes[i + 1]));
+  }
+
+  esInicioZonaVip(fila: Butaca[]): boolean {
+    return fila[0]?.fila === this.FILAS_VIP[0];
   }
 
   seleccionarButaca(butaca: Butaca) {
@@ -120,6 +142,12 @@ export class Butacas implements OnInit, OnDestroy {
   private actualizarEstadoButaca(butacaId: string, estado: Butaca['estado']) {
     this.matrizSala.update(matriz =>
       matriz.map(fila => fila.map(b => b.id === butacaId ? { ...b, estado } : b))
+    );
+  }
+
+  private liberarButaca(butacaId: string) {
+    this.matrizSala.update(matriz =>
+      matriz.map(fila => fila.map((b): Butaca => b.id === butacaId && b.estado === 'ocupada' ? { ...b, estado: 'libre' } : b))
     );
   }
 
@@ -197,19 +225,24 @@ export class Butacas implements OnInit, OnDestroy {
     return edad;
   }
 
+  private tipoDeFila(letra: string): Butaca['tipo'] {
+    if (letra === this.FILA_ACCESIBLE) return 'accesible';
+    return this.FILAS_VIP.includes(letra) ? 'vip' : 'normal';
+  }
+
   private generarSala() {
     const totalAccesibles = this.SECCIONES_ACCESIBLES.reduce((a, b) => a + b, 0);
 
     const matriz: Butaca[][] = this.FILAS_LETRAS.map((letra): Butaca[] => {
-      const esAccesible = letra === this.FILA_ACCESIBLE;
-      const cantidad = esAccesible ? totalAccesibles : this.COLUMNAS;
+      const cantidad = letra === this.FILA_ACCESIBLE ? totalAccesibles : this.COLUMNAS;
+      const tipo = this.tipoDeFila(letra);
 
       return Array.from({ length: cantidad }, (_, j) => ({
         id: `${letra}-${j + 1}`,
         fila: letra,
         numero: j + 1,
         estado: 'libre',
-        tipo: esAccesible ? 'accesible' : 'normal'
+        tipo
       }));
     });
 
@@ -221,9 +254,12 @@ export class Butacas implements OnInit, OnDestroy {
     if (!id) return;
 
     try {
-      const data = await this.funcionesService.obtenerDetalleFuncion(id);
+      const [data] = await Promise.all([
+        this.funcionesService.obtenerDetalleFuncion(id),
+        this.precios.cargar()
+      ]);
       if (!data) return;
-      
+
       const pelicula = data.Peliculas as any;
 
       this.detalleFuncion.set({
@@ -231,7 +267,7 @@ export class Butacas implements OnInit, OnDestroy {
         horario: new Date(data.fecha_hora_inicio).toLocaleString(),
         sala: (data.Salas as any).nombre,
         edadMinima: pelicula.edad_minima || 0,
-        precioEntrada: precioEntrada(pelicula, this.sesionCompra.precioBaseEntrada),
+        precioEntrada: precioEntrada(pelicula, this.precios.precioBase()),
         enVenta: estadoVenta(pelicula) !== 'proximamente'
       });
     } catch (error) {
@@ -249,7 +285,7 @@ export class Butacas implements OnInit, OnDestroy {
       if (ocupadas.size === 0) return;
 
       this.matrizSala.update(matriz =>
-        matriz.map(fila => fila.map(b => ocupadas.has(b.id) ? { ...b, estado: 'ocupada' } : b))
+        matriz.map(fila => fila.map((b): Butaca => ocupadas.has(b.id) ? { ...b, estado: 'ocupada' } : b))
       );
     } catch (error) {
       console.error('Error al cargar butacas ocupadas:', error);
