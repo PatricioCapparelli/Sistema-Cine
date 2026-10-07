@@ -93,7 +93,9 @@ export class Cartelera implements OnInit {
         hora: func.fecha_hora_inicio,
         sala: func.Salas?.nombre || 'Sala General',
         visual: func.formato_visual,
-        audio: func.formato_audio
+        audio: func.formato_audio,
+        formatoVisual: func.formato_visual,
+        formatoAudio: func.formato_audio,
       });
     }
 

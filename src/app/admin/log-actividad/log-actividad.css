@@ -1,0 +1,161 @@
+.log-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+    color: var(--crema);
+}
+
+.encabezado h2 {
+    margin: 0 0 4px;
+}
+
+.encabezado p {
+    margin: 0 0 20px;
+    color: var(--beige);
+    font-size: 0.9rem;
+}
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 7px 16px;
+    background: transparent;
+    color: var(--crema);
+    border: 1px solid var(--marron-gris);
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.chip:hover:not(:disabled) {
+    border-color: var(--estrellas);
+}
+
+.chip.activo {
+    background: var(--estrellas);
+    border-color: var(--estrellas);
+    color: var(--marron-oscuro);
+}
+
+.chip:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.tabla-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--marron-gris);
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 10px 14px;
+    background: var(--marron-oscuro);
+    color: var(--crema);
+    text-align: left;
+    white-space: nowrap;
+}
+
+td {
+    padding: 10px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--marron-gris) 60%, transparent);
+    vertical-align: top;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--crema) 5%, transparent);
+}
+
+.fecha {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.quien {
+    display: block;
+    font-weight: 600;
+}
+
+.email {
+    color: var(--beige);
+}
+
+.etiqueta {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.etiqueta.crear {
+    background: var(--verde-suave);
+    color: var(--marron-oscuro);
+}
+
+.etiqueta.eliminar {
+    background: color-mix(in srgb, #ff6b6b 25%, transparent);
+    color: #ff6b6b;
+}
+
+.etiqueta.precio {
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+}
+
+.etiqueta.validar {
+    background: var(--beige);
+    color: var(--marron-oscuro);
+}
+
+.etiqueta.otra {
+    border: 1px solid var(--marron-gris);
+}
+
+.paginacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    color: var(--beige);
+}
+
+.botones {
+    display: flex;
+    gap: 8px;
+}
+
+.mensaje {
+    color: var(--beige);
+}
+
+.mensaje-error {
+    color: #ff6b6b;
+    font-weight: 600;
+}

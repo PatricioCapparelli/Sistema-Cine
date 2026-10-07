@@ -9,6 +9,7 @@ import { Auth } from '../../core/services/auth.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { estadoVenta, inicioPreventa } from '../../core/utils/venta-pelicula/venta-pelicula';
+import { FuncionesService } from '../../core/services/funciones.service';
 
 @Component({
   selector: 'app-pelicula',
@@ -44,6 +45,20 @@ export class Pelicula implements OnInit {
   etiquetaEdad = computed(() => (this.edadMinima() > 0 ? `+${this.edadMinima()}` : 'ATP'));
   estado = computed(() => estadoVenta(this.peliculaInput() ?? {}));
   fechaInicioPreventa = computed(() => inicioPreventa(this.peliculaInput() ?? {}));
+  formatos = computed(() => {
+    const vistos = new Set<string>();
+
+    for (const funcion of this.funcionesInput()) {
+      if (funcion.formatoVisual && funcion.formatoAudio) {
+        vistos.add(`${funcion.formatoVisual}|${funcion.formatoAudio}`);
+      }
+    }
+
+    return [...vistos].map(clave => {
+      const [visual, audio] = clave.split('|');
+      return { visual, audio };
+    });
+  });
 
   async ngOnInit() {
     await this.cargarResenas();

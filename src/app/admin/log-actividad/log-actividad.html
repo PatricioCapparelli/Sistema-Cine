@@ -1,0 +1,72 @@
+<div class="log-container">
+    <header class="encabezado">
+        <h2>Log de actividad</h2>
+        <p>Quién hizo qué y cuándo. Los registros no se pueden editar ni borrar desde la aplicación.</p>
+    </header>
+
+    <div class="filtros">
+        <div class="chips">
+            @for (grupo of GRUPOS; track grupo.valor) {
+            <button type="button" class="chip"
+                [class.activo]="this.grupo() === grupo.valor"
+                (click)="cambiarGrupo(grupo.valor)">
+                {{ grupo.etiqueta }}
+            </button>
+            }
+        </div>
+
+        <div class="chips">
+            @for (opcion of PERIODOS; track opcion.etiqueta) {
+            <button type="button" class="chip"
+                [class.activo]="periodo() === opcion.dias"
+                (click)="cambiarPeriodo(opcion.dias)">
+                {{ opcion.etiqueta }}
+            </button>
+            }
+        </div>
+    </div>
+
+    @if (cargando()) {
+    <p class="mensaje">Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje mensaje-error">No se pudo cargar el log. <button type="button" class="chip" (click)="cargar()">Reintentar</button></p>
+    } @else if (filas().length === 0) {
+    <p class="mensaje">No hay actividad registrada con estos filtros.</p>
+    } @else {
+    <div class="tabla-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha y hora</th>
+                    <th>Quién</th>
+                    <th>Acción</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (fila of filas(); track fila.id) {
+                <tr>
+                    <td class="fecha">{{ fila.created_at | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                    <td>
+                        <span class="quien">{{ fila.usuario_nombre || fila.usuario_email || 'Desconocido' }}</span>
+                        @if (fila.usuario_nombre && fila.usuario_email) {
+                        <small class="email">{{ fila.usuario_email }}</small>
+                        }
+                    </td>
+                    <td><span class="etiqueta" [class]="'etiqueta ' + accion(fila.accion).clase">{{ accion(fila.accion).texto }}</span></td>
+                    <td>{{ fila.detalle }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="paginacion">
+        <span>{{ primero() }}–{{ ultimo() }} de {{ total() }}</span>
+        <div class="botones">
+            <button type="button" class="chip" [disabled]="pagina() === 0" (click)="anterior()">Anterior</button>
+            <button type="button" class="chip" [disabled]="pagina() + 1 >= totalPaginas()" (click)="siguiente()">Siguiente</button>
+        </div>
+    </footer>
+    }
+</div>

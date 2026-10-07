@@ -48,6 +48,11 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/abm-usuarios/abm-usuarios').then(m => m.AbmUsuariosComponent)
     },
     {
+        path: 'admin/log',
+        canActivate: [logueadoGuard, adminGuard],
+        loadComponent: () => import('./admin/log-actividad/log-actividad').then(m => m.LogActividadComponent)
+    },
+    {
         path: 'mis-puntos',
         canActivate: [logueadoGuard],
         loadComponent: () => import('./componentes/mis-puntos/mis-puntos').then(m => m.MisPuntosComponent)
@@ -68,19 +73,19 @@ export const routes: Routes = [
         loadComponent: () => import('./componentes/candy/candy').then(m => m.Candy)
     },
     {
-    path: 'mis-peliculas',
-    canActivate: [logueadoGuard],
-    loadComponent: () => import('./componentes/mis-peliculas/mis-peliculas').then(m => m.MisPeliculasComponent)
-},
+        path: 'mis-peliculas',
+        canActivate: [logueadoGuard],
+        loadComponent: () => import('./componentes/mis-peliculas/mis-peliculas').then(m => m.MisPeliculasComponent)
+    },
     {
-    path: 'proximamente',
-    loadComponent: () => import('./componentes/proximamente/proximamente').then(m => m.ProximamenteComponent)
-},
-{
-    path: 'mis-compras',
-    canActivate: [logueadoGuard],
-    loadComponent: () => import('./componentes/mis-compras/mis-compras').then(m => m.MisComprasComponent)
-},
+        path: 'proximamente',
+        loadComponent: () => import('./componentes/proximamente/proximamente').then(m => m.ProximamenteComponent)
+    },
+    {
+        path: 'mis-compras',
+        canActivate: [logueadoGuard],
+        loadComponent: () => import('./componentes/mis-compras/mis-compras').then(m => m.MisComprasComponent)
+    },
 
     { path: '', redirectTo: 'cartelera', pathMatch: 'full' },
     { path: '**', redirectTo: 'cartelera' }

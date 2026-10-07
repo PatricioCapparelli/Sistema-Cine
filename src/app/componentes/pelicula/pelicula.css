@@ -311,3 +311,29 @@
     font-size: 0.85rem;
     font-weight: 600;
 }
+
+.formatos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.etiqueta-formato {
+    padding: 4px 12px;
+    background: transparent;
+    color: var(--marron-oscuro);
+    border: 1px solid var(--beige);
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+.etiqueta-formato strong {
+    color: var(--estrellas);
+}
+
+.formato-horario {
+    display: block;
+    color: var(--marron-oscuro);
+    font-size: 0.75rem;
+}

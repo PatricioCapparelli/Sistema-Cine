@@ -2,18 +2,43 @@ import { inject, signal, effect, untracked, Service } from '@angular/core';
 import { Supabase } from './supabase.service';
 import { Auth } from './auth.service';
 import { IAviso, IProxima, IPeliculaVista } from '../interfaces/Proxima';
+import { NotificacionesService } from './notificaciones.service';
 
 @Service()
 export class ProximamenteService {
     private s = inject(Supabase).Supabase;
     private auth = inject(Auth);
+    private notificaciones = inject(NotificacionesService);
+    private notificados = new Set<number>();
+
+    private readonly INTERVALO_MS = 5 * 60 * 1000;
 
     avisos = signal<IAviso[]>([]);
 
     constructor() {
-        effect(() => {
+        effect((alLimpiar) => {
             const usuario = this.auth.usuarioActual();
-            untracked(() => (usuario ? this.cargarAvisos() : this.avisos.set([])));
+
+            if (!usuario) {
+                untracked(() => {
+                    this.avisos.set([]);
+                    this.notificados.clear();
+                });
+                return;
+            }
+
+            untracked(() => this.cargarAvisos());
+
+            const temporizador = setInterval(() => this.cargarAvisos(), this.INTERVALO_MS);
+            const alVolver = () => {
+                if (document.visibilityState === 'visible') this.cargarAvisos();
+            };
+            document.addEventListener('visibilitychange', alVolver);
+
+            alLimpiar(() => {
+                clearInterval(temporizador);
+                document.removeEventListener('visibilitychange', alVolver);
+            });
         });
     }
 
@@ -50,7 +75,30 @@ export class ProximamenteService {
             console.error('Error al obtener los avisos', error);
             return;
         }
-        this.avisos.set((data || []) as IAviso[]);
+
+        const pendientes = (data || []) as IAviso[];
+
+        this.avisos.update(actuales => {
+            const ids = new Set(actuales.map(a => a.pelicula_id));
+            return [...actuales, ...pendientes.filter(a => !ids.has(a.pelicula_id))];
+        });
+
+        let avisados = false;
+
+        for (const aviso of pendientes.filter(a => !this.notificados.has(a.pelicula_id))) {
+            const mostrado = this.notificaciones.mostrar(
+                'Ya hay entradas a la venta',
+                `Ya podés comprar entradas de "${aviso.nombre}".`,
+                `pelicula-${aviso.pelicula_id}`
+            );
+
+            if (mostrado) {
+                this.notificados.add(aviso.pelicula_id);
+                avisados = true;
+            }
+        }
+
+        if (avisados) await this.s.rpc('marcar_avisos_vistos');
     }
 
     async descartarAvisos(): Promise<void> {

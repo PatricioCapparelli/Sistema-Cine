@@ -1,0 +1,82 @@
+<section class="ranking">
+    <header class="ranking-encabezado">
+        <h3>Lo más elegido</h3>
+        <div class="chips">
+            @for (opcion of PERIODOS; track opcion.dias) {
+            <button type="button" class="chip"
+                [class.activo]="periodo() === opcion.dias"
+                (click)="cargar(opcion.dias)">
+                {{ opcion.etiqueta }}
+            </button>
+            }
+        </div>
+    </header>
+
+    @if (cargando()) {
+    <p class="mensaje">Cargando...</p>
+    } @else if (error()) {
+    <p class="mensaje mensaje-error">No se pudieron cargar los rankings. <button type="button" class="chip" (click)="cargar(periodo())">Reintentar</button></p>
+    } @else {
+    <div class="paneles">
+        <article class="panel">
+            <h4>Películas más vistas</h4>
+            <p class="nota">Entradas vendidas en el período.</p>
+
+            @if (peliculas().length === 0) {
+            <p class="mensaje">Sin ventas en este período.</p>
+            } @else {
+            <ol class="barras">
+                @for (item of peliculas(); track $index; let i = $index) {
+                <li>
+                    <span class="posicion">{{ i + 1 }}</span>
+                    <div class="barra-info">
+                        <div class="barra-titulo">
+                            <span>{{ item.nombre }}</span>
+                            <strong>{{ item.cantidad }} {{ item.cantidad === 1 ? 'entrada' : 'entradas' }}</strong>
+                        </div>
+                        <div class="barra" aria-hidden="true">
+                            <span class="relleno" [class.primero]="i === 0"
+                                [style.width.%]="porcentaje(item.cantidad, maxPeliculas())"></span>
+                        </div>
+                    </div>
+                </li>
+                }
+            </ol>
+            }
+        </article>
+
+        <article class="panel">
+            <h4>Candy bar</h4>
+            <p class="nota">Unidades vendidas en el período.</p>
+
+            @if (masVendido(); as top) {
+            <div class="destacado">
+                <span class="destacado-etiqueta">Más vendido</span>
+                <strong class="destacado-nombre">{{ top.nombre }}</strong>
+                <span>{{ top.cantidad }} {{ top.cantidad === 1 ? 'unidad' : 'unidades' }} · {{ moneda(top.recaudado) }}</span>
+            </div>
+
+            <ol class="barras">
+                @for (item of candy(); track $index; let i = $index) {
+                <li>
+                    <span class="posicion">{{ i + 1 }}</span>
+                    <div class="barra-info">
+                        <div class="barra-titulo">
+                            <span>{{ item.nombre }}</span>
+                            <strong>{{ item.cantidad }} u.</strong>
+                        </div>
+                        <div class="barra" aria-hidden="true">
+                            <span class="relleno" [class.primero]="i === 0"
+                                [style.width.%]="porcentaje(item.cantidad, maxCandy())"></span>
+                        </div>
+                    </div>
+                </li>
+                }
+            </ol>
+            } @else {
+            <p class="mensaje">Sin ventas de candy en este período.</p>
+            }
+        </article>
+    </div>
+    }
+</section>

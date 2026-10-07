@@ -11,6 +11,15 @@
         }
     </div>
 
+    <div class="exportar">
+        <button type="button" class="btn-exportar" [disabled]="!puedeExportar()" (click)="exportarExcel()">
+            {{ exportando() === 'excel' ? 'Generando...' : 'Exportar a Excel' }}
+        </button>
+        <button type="button" class="btn-exportar" [disabled]="!puedeExportar()" (click)="exportarPdf()">
+            {{ exportando() === 'pdf' ? 'Generando...' : 'Exportar a PDF' }}
+        </button>
+    </div>
+
     <div class="resumen">
         <div class="tarjeta">
             <span class="tarjeta-titulo">Facturado</span>
@@ -50,4 +59,6 @@
         </table>
     </div>
     }
+
+    <app-ranking-ventas />
 </div>

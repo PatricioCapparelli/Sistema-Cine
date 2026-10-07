@@ -28,9 +28,18 @@
                         <span class="etiqueta-edad" [class.restringida]="edadMinima() > 0">{{ etiquetaEdad() }}</span>
                         <span class="texto-edad">{{ descripcionEdad() }}</span>
                     </div>
-
                     @if (edadMinima() > 0 && !authService.usuarioActual()) {
                     <p class="aviso-edad">Para comprar entradas de esta película tenés que iniciar sesión.</p>
+                    }
+
+                    @if (formatos().length > 0) {
+                    <div class="formatos">
+                        @for (formato of formatos(); track $index) {
+                        <span class="etiqueta-formato">
+                            <strong>{{ formato.visual }}</strong> · {{ formato.audio }}
+                        </span>
+                        }
+                    </div>
                     }
                 </div>
             </div>
@@ -62,6 +71,7 @@
                     @for (funcion of funcionesInput(); track funcion.idFuncion) {
                     <div class="horario-badge">
                         <span>{{ funcion.hora | date:'dd/MM HH:mm' }} hs</span>
+                        <small class="formato-horario">{{ funcion.formatoVisual }} · {{ funcion.formatoAudio }}</small>
                         <button (click)="iniciarCompra(funcion)" class="btn-comprar">
                             Comprar
                         </button>

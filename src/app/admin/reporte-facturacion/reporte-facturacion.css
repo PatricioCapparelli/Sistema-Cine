@@ -88,3 +88,31 @@ tbody tr:nth-child(even) {
     color: var(--marron-claro);
     font-weight: bold;
 }
+
+.exportar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 20px;
+}
+
+.btn-exportar {
+    padding: 9px 18px;
+    background: var(--marron-claro);
+    color: var(--crema);
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-exportar:hover:not(:disabled) {
+    background: var(--marron-oscuro);
+}
+
+.btn-exportar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
