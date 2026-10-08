@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { Auth } from '../../core/services/auth.service';
+import { AlertaService } from '../../core/services/alerta.service';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,7 @@ export class Login implements OnInit {
     email: 'admin@hotmail.com',
     password: 'Admin123!'
   };
-
+  private alerta = inject(AlertaService);
 
   edadMinima = signal(0);
   idFuncion = signal<string | null>(null);
@@ -65,7 +66,7 @@ export class Login implements OnInit {
 
       } catch (error) {
         console.error('Error de autenticación:', error);
-        alert('Credenciales incorrectas. Intentá nuevamente.');
+        this.alerta.error('credenciales incorrectas')
       }
     }
   }

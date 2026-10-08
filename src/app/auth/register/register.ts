@@ -2,6 +2,7 @@ import { Component, ElementRef, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Auth } from '../../core/services/auth.service';
 import { IAuthData } from '../../core/interfaces/Usuario';
+import { AlertaService } from '../../core/services/alerta.service';
 
 type Campo = 'email' | 'password' | 'nombre' | 'apellido' | 'tipo_sangre' | 'color_ojos' | 'dias_vacaciones';
 
@@ -38,7 +39,7 @@ export class Register {
   readonly TIPOS_SANGRE = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   readonly COLORES_OJOS = ['Marrón', 'Azul', 'Verde', 'Miel/Avellana', 'Gris', 'Negro', 'Otro'];
   readonly DIAS_VACACIONES = [0, 7, 14, 21, 28];
-
+  private alerta = inject(AlertaService);
   private readonly MENSAJES: Record<Campo, Record<string, string>> = {
     email: {
       required: 'Ingresá tu email.',
@@ -152,8 +153,7 @@ export class Register {
       } as IAuthData;
 
       await this.authService.registrar(nuevoUsuario);
-
-      alert('Registro exitoso! Ya puedes iniciar sesion.');
+      this.alerta.exito('Registro exitoso! Ya puedes iniciar sesion.');
       this.reiniciar();
     } catch (error: any) {
       console.error('Error en el registro', error);

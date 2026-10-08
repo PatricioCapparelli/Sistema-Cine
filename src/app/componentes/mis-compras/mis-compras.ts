@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { CreditoService, ICompra } from '../../core/services/credito.service';
+import { AlertaService } from '../../core/services/alerta.service';
 
 @Component({
   selector: 'app-mis-compras',
@@ -11,7 +12,7 @@ import { CreditoService, ICompra } from '../../core/services/credito.service';
 })
 export class MisComprasComponent implements OnInit {
   private servicio = inject(CreditoService);
-
+  private alerta = inject(AlertaService)
   private readonly MENSAJES: Record<string, string> = {
     FUERA_DE_PLAZO: 'Ya pasó el plazo: solo se puede cancelar hasta 2 horas antes de la función.',
     ENTRADA_USADA: 'Esta entrada ya fue utilizada.',
@@ -52,14 +53,14 @@ export class MisComprasComponent implements OnInit {
     if (this.cancelando()) return;
 
     const aviso = `¿Cancelar esta compra? Se acreditarán $${compra.total} de crédito en tu cuenta para futuras compras. No se devuelve dinero.`;
-    if (!confirm(aviso)) return;
+    if (!(await this.alerta.confirmar(aviso))) return;
 
     this.cancelando.set(compra.venta_id);
     try {
       const credito = await this.servicio.cancelarCompra(compra.venta_id);
-      alert(`Compra cancelada. Se acreditaron $${credito} de crédito.`);
+      this.alerta.exito(`Compra cancelada. Se acreditaron $${credito} de crédito.`);
     } catch (error: any) {
-      alert(this.MENSAJES[error.message] ?? 'No se pudo cancelar la compra.');
+      this.alerta.error(this.MENSAJES[error.message] ?? 'No se pudo cancelar la compra.');
     } finally {
       this.cancelando.set(null);
     }

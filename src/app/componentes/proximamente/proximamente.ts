@@ -6,6 +6,7 @@ import { IProxima } from '../../core/interfaces/Proxima';
 import { Auth } from '../../core/services/auth.service';
 import { estadoVenta, inicioPreventa } from '../../core/utils/venta-pelicula/venta-pelicula';
 import { NotificacionesService } from '../../core/services/notificaciones.service';
+import { AlertaService } from '../../core/services/alerta.service';
 
 @Component({
   selector: 'app-proximamente',
@@ -19,6 +20,7 @@ export class ProximamenteComponent implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
   private notificaciones = inject(NotificacionesService);
+  private alerta = inject(AlertaService)
 
   peliculas = signal<IProxima[]>([]);
   alertas = signal<Set<number>>(new Set());
@@ -106,7 +108,7 @@ export class ProximamenteComponent implements OnInit {
     if (!activa) void this.servicio.cargarAvisos();
   } catch (error) {
     console.error(error);
-    alert('No se pudo actualizar la alerta.');
+    this.alerta.error('No se pudo actualizar la alerta.');
   } finally {
     this.procesando.set(null);
   }

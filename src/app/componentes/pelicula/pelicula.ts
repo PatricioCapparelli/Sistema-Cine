@@ -10,6 +10,7 @@ import { ReservaService } from '../../core/services/reserva.service';
 import { SesionCompraService } from '../../core/services/sesion-compra.service';
 import { estadoVenta, inicioPreventa } from '../../core/utils/venta-pelicula/venta-pelicula';
 import { FuncionesService } from '../../core/services/funciones.service';
+import { AlertaService } from '../../core/services/alerta.service';
 
 @Component({
   selector: 'app-pelicula',
@@ -29,6 +30,7 @@ export class Pelicula implements OnInit {
   private sesionCompra = inject(SesionCompraService);
   private reservaService = inject(ReservaService);
   private router = inject(Router);
+  private alerta = inject(AlertaService)
 
   modalAbierto = signal<boolean>(false);
   listaResenas = signal<any[]>([]);
@@ -82,14 +84,14 @@ export class Pelicula implements OnInit {
     const comentario = this.nuevoComentario().trim();
 
     if (!comentario) {
-      alert('Por favor, escribí un comentario antes de enviar.');
+      this.alerta.aviso('Por favor, escribí un comentario antes de enviar.');
       return;
     }
 
     const usuario = this.authService.usuarioActual();
 
     if (!usuario) {
-      alert('Error: Tenés que iniciar sesión para dejar una reseña.');
+      this.alerta.error('Error: Tenés que iniciar sesión para dejar una reseña.');
       return;
     }
 
@@ -108,7 +110,7 @@ export class Pelicula implements OnInit {
 
       } catch (error) {
         console.error('Error guardando la reseña:', error);
-        alert('Hubo un problema al guardar tu reseña.');
+        this.alerta.error('Hubo un problema al guardar tu reseña.');
       }
     }
   }
@@ -142,7 +144,7 @@ export class Pelicula implements OnInit {
 
   iniciarCompra(funcion: any) {
     if (estadoVenta(this.peliculaInput() ?? {}) === 'proximamente') {
-      alert('Las entradas de esta película todavía no están a la venta.');
+      this.alerta.aviso('Las entradas de esta película todavía no están a la venta.');
       return;
     }
     console.log('usuario', this.authService.usuarioActual(), 'perfil', this.authService.perfilActual(), 'anonimo', this.sesionCompra.esAnonimo(), 'funcion', funcion);
@@ -162,7 +164,7 @@ export class Pelicula implements OnInit {
     if (edadMinima > 0) {
 
       if (esAnonimo && !hayUsuarioRegistrado) {
-        alert(`Las películas +${edadMinima} no se pueden comprar como invitado. Redirigiendo al login...`);
+        this.alerta.error(`Las películas +${edadMinima} no se pueden comprar como invitado. Redirigiendo al login...`);
         this.router.navigate(['/auth/login'], { queryParams: { funcionId: funcion.idFuncion } });
         return;
       }
@@ -170,11 +172,11 @@ export class Pelicula implements OnInit {
       if (hayUsuarioRegistrado && usuarioDB?.fecha_nacimiento) {
         const edadUsuario = this.calcularEdad(usuarioDB.fecha_nacimiento);
         if (edadUsuario < edadMinima) {
-          alert(`Control de seguridad: Esta función requiere ser mayor de ${edadMinima} años.`);
+          this.alerta.aviso(`Control de seguridad: Esta función requiere ser mayor de ${edadMinima} años.`);
           return;
         }
       } else if (hayUsuarioRegistrado) {
-        alert("Necesitás configurar tu fecha de nacimiento en tu perfil para comprar esta entrada.");
+        this.alerta.error("Necesitás configurar tu fecha de nacimiento en tu perfil para comprar esta entrada.");
         return;
       }
     }

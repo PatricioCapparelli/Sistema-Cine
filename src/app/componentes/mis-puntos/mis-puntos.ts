@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FidelizacionService } from '../../core/services/fidelizacion.service';
 import { IRecompensa, ICanje } from '../../core/interfaces/Canje';
+import { AlertaService } from '../../core/services/alerta.service';
 
 @Component({
   selector: 'app-mis-puntos',
@@ -11,7 +12,7 @@ import { IRecompensa, ICanje } from '../../core/interfaces/Canje';
 })
 export class MisPuntosComponent implements OnInit {
   private fidelizacion = inject(FidelizacionService);
-
+  private alerta = inject(AlertaService)
   private readonly MENSAJES_ERROR: Record<string, string> = {
     PUNTOS_INSUFICIENTES: 'No tenés puntos suficientes.',
     RECOMPENSA_INVALIDA: 'Esa recompensa ya no está disponible.',
@@ -49,14 +50,14 @@ export class MisPuntosComponent implements OnInit {
 
   async canjear(recompensa: IRecompensa) {
     if (this.canjeando()) return;
-    if (!confirm(`¿Canjear ${recompensa.costo_puntos} puntos por "${recompensa.nombre}"?`)) return;
+    if (!(await this.alerta.confirmar(`¿Canjear ${recompensa.costo_puntos} puntos por "${recompensa.nombre}"?`))) return;
 
     this.canjeando.set(true);
     try {
       const codigo = await this.fidelizacion.canjear(recompensa.id);
       this.ultimoCanje.set({ codigo, recompensa: recompensa.nombre });
     } catch (error: any) {
-      alert(this.MENSAJES_ERROR[error.message] ?? 'No se pudo realizar el canje.');
+      this.alerta.error(this.MENSAJES_ERROR[error.message] ?? 'No se pudo realizar el canje.');
     } finally {
       this.canjeando.set(false);
     }

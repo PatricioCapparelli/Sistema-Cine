@@ -9,6 +9,7 @@ import { SalaEnVivoService } from '../../core/services/sala-en-vivo.service';
 import { PreciosService } from '../../core/services/precio.service';
 import { Butaca } from '../../core/interfaces/Butaca';
 import { precioEntrada, estadoVenta } from '../../core/utils/venta-pelicula/venta-pelicula';
+import { AlertaService } from '../../core/services/alerta.service';
 
 interface DetalleFuncion {
   pelicula: string;
@@ -34,7 +35,7 @@ export class Butacas implements OnInit, OnDestroy {
   private authService = inject(Auth);
   private salaEnVivo = inject(SalaEnVivoService);
   public precios = inject(PreciosService);
-
+  private alerta = inject(AlertaService)
   private readonly FILAS_LETRAS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'ACC', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
   private readonly FILAS_VIP = ['R', 'S', 'T'];
   private readonly FILA_ACCESIBLE = 'ACC';
@@ -118,12 +119,12 @@ export class Butacas implements OnInit, OnDestroy {
     const idFunc = this.idFuncion();
 
     if (!idFunc) {
-      alert('Error: No se identificó la función.');
+      this.alerta.error('Error: No se identificó la función.');
       return;
     }
 
     if (this.cantidadSeleccionadas() === 0) {
-      alert('Debes seleccionar al menos una butaca para continuar.');
+      this.alerta.aviso('Debes seleccionar al menos una butaca para continuar.');
       return;
     }
 
@@ -156,7 +157,7 @@ export class Butacas implements OnInit, OnDestroy {
 
     if (this.butacasSeleccionadas().some(b => b.id === butacaId)) {
       this.butacasSeleccionadas.update(actuales => actuales.filter(b => b.id !== butacaId));
-      alert(`La butaca ${butacaId} acaba de ser comprada por otra persona. Elegí otra.`);
+      this.alerta.aviso(`La butaca ${butacaId} acaba de ser comprada por otra persona. Elegí otra.`);
     }
 
     this.publicarSeleccion();
@@ -209,7 +210,7 @@ export class Butacas implements OnInit, OnDestroy {
   }
 
   private rechazarAcceso(mensaje: string): false {
-    alert(mensaje);
+    this.alerta.aviso(mensaje);
     this.router.navigate(['/cartelera']);
     return false;
   }

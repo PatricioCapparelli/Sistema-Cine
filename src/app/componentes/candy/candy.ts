@@ -16,6 +16,7 @@ import { IProductoCandy } from '../../core/interfaces/Candy';
 import { ICombo } from '../../core/interfaces/Combo';
 import { Venta } from '../../core/interfaces/Venta';
 import { Butaca } from '../../core/interfaces/Butaca';
+import { AlertaService } from '../../core/services/alerta.service';
 
 interface TicketCreado {
   id: string;
@@ -52,6 +53,7 @@ export class Candy implements OnInit, OnDestroy {
   public reservaService = inject(ReservaService);
   public authService = inject(Auth);
 
+  private alerta = inject(AlertaService);
   private saldoReal = signal(0);
 
   comprando = signal(false);
@@ -168,7 +170,7 @@ export class Candy implements OnInit, OnDestroy {
 
   agregarCombo(combo: ICombo) {
     if (!this.hayPromoDisponible()) {
-      alert('Ya aplicaste promociones o combos a todas tus butacas.');
+      this.alerta.aviso('Ya aplicaste promociones o combos a todas tus butacas.');
       return;
     }
     this.combosAplicados.update(combos => [...combos, combo]);
@@ -180,17 +182,17 @@ export class Candy implements OnInit, OnDestroy {
 
   aplicarEntradaGratis() {
     if (this.costoPuntosPorEntrada() <= 0) {
-      alert('Por ahora no hay entradas canjeables con puntos.');
+      this.alerta.aviso('Por ahora no hay entradas canjeables con puntos.');
       return;
     }
 
     if (!this.hayPromoDisponible()) {
-      alert('Ya aplicaste promociones o combos a todas tus butacas.');
+      this.alerta.aviso('Ya aplicaste promociones o combos a todas tus butacas.');
       return;
     }
 
     if (this.saldoPuntos() < this.costoPuntosPorEntrada()) {
-      alert('No tenés suficientes puntos para canjear otra entrada.');
+      this.alerta.aviso('No tenés suficientes puntos para canjear otra entrada.');
       return;
     }
 
@@ -208,7 +210,7 @@ export class Candy implements OnInit, OnDestroy {
     const butacas = this.reservaService.butacasSeleccionadas();
 
     if (!idFunc || butacas.length === 0) {
-      alert('Error: No hay una reserva activa.');
+      this.alerta.error('Error: No hay una reserva activa.');
       return;
     }
 
@@ -241,14 +243,14 @@ export class Candy implements OnInit, OnDestroy {
     return Math.round(valor * 100) / 100;
   }
 
-  private confirmarButacasVip(): boolean {
+  private async confirmarButacasVip(): Promise<boolean> {
     const cantidad = this.cantidadVip();
     if (cantidad === 0) return true;
 
     const etiqueta = cantidad === 1 ? 'butaca VIP' : 'butacas VIP';
     const recargo = cantidad * this.recargoVip();
 
-    return confirm(`Tu compra incluye ${cantidad} ${etiqueta} (${this.idsVip()}) con un recargo de $${recargo}, que se cobra también si usás combos o canjes de puntos. ¿Querés continuar?`);
+    return this.alerta.confirmar(`Tu compra incluye ${cantidad} ${etiqueta} (${this.idsVip()}) con un recargo de $${recargo}, que se cobra también si usás combos o canjes de puntos. ¿Querés continuar?`);
   }
 
   private async cargarProductos() {
@@ -323,11 +325,11 @@ export class Candy implements OnInit, OnDestroy {
 
   private avisarResultado(codigo: string, fallidos: string[]) {
     if (fallidos.length === 0) {
-      alert('¡Compra exitosa! Se descargará tu comprobante.');
+      this.alerta.exito('¡Compra exitosa! Se descargará tu comprobante.');
       return;
     }
 
-    alert(`Tu compra se realizó, pero hubo un problema con: ${fallidos.join(', ')}. Tu código manual es ${codigo}; mostralo en el mostrador.`);
+    this.alerta.aviso(`Tu compra se realizó, pero hubo un problema con: ${fallidos.join(', ')}. Tu código manual es ${codigo}; mostralo en el mostrador.`);
   }
 
   private async manejarErrorCompra(error: any, idFuncion: string) {
@@ -335,32 +337,32 @@ export class Candy implements OnInit, OnDestroy {
 
     switch (error?.message) {
       case 'BUTACA_YA_VENDIDA':
-        alert('Alguna de tus butacas acaba de ser comprada por otra persona. Volvé a elegir tus asientos.');
+        this.alerta.error('Alguna de tus butacas acaba de ser comprada por otra persona. Volvé a elegir tus asientos.');
         this.reservaService.butacasSeleccionadas.set([]);
         this.router.navigate(['/comprar', idFuncion]);
         break;
       case 'PUNTOS_INSUFICIENTES':
-        alert('Ya no tenés puntos suficientes para las entradas canjeadas. Revisá tu saldo e intentá de nuevo.');
+        this.alerta.error('Ya no tenés puntos suficientes para las entradas canjeadas. Revisá tu saldo e intentá de nuevo.');
         this.entradasGratisAplicadas.set(0);
         await this.cargarPuntos();
         break;
       case 'CREDITO_INSUFICIENTE':
-        alert('Tu crédito cambió y ya no alcanza. Revisalo e intentá de nuevo.');
+        this.alerta.error('Tu crédito cambió y ya no alcanza. Revisalo e intentá de nuevo.');
         this.usarCredito.set(false);
         await this.creditoService.cargarSaldo();
         break;
       case 'VENTA_NO_DISPONIBLE':
-        alert('Las entradas de esta película todavía no están a la venta.');
+        this.alerta.error('Las entradas de esta película todavía no están a la venta.');
         this.router.navigate(['/cartelera']);
         break;
       case 'PRECIO_INVALIDO':
-        alert('Los precios cambiaron mientras comprabas. Volvé a elegir tus butacas.');
+        this.alerta.error('Los precios cambiaron mientras comprabas. Volvé a elegir tus butacas.');
         await this.precioService.cargar(true);
         this.reservaService.butacasSeleccionadas.set([]);
         this.router.navigate(['/comprar', idFuncion]);
         break;
       default:
-        alert('Hubo un error al procesar tu compra. Revisa la consola.');
+        this.alerta.error('Hubo un error al procesar tu compra. Revisa la consola.');
     }
   }
 
