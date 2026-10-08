@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../core/services/auth.service';
 import { CreditoService } from '../../core/services/credito.service';
-
+import { PwaService } from '../../core/services/pwa.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,7 +15,8 @@ export class NavbarComponent {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   public authS = inject(Auth);
   credito = inject(CreditoService);
-
+  pwa = inject(PwaService);
+  
   @HostListener('document:click', ['$event'])
   cerrarMenus(evento: Event) {
     this.host.nativeElement.querySelectorAll('details[open]').forEach(menu => {

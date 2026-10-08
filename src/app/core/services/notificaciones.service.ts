@@ -32,11 +32,23 @@ export class NotificacionesService {
         return this.permiso();
     }
 
-    mostrar(titulo: string, cuerpo: string, etiqueta: string, ruta = '/cartelera'): boolean {
+    async mostrar(titulo: string, cuerpo: string, etiqueta: string, ruta = '/cartelera'): Promise<boolean> {
         if (!this.soportadas || Notification.permission !== 'granted') return false;
 
         try {
-            const notificacion = new Notification(titulo, { body: cuerpo, tag: etiqueta, icon: '/favicon.ico' });
+            const registro = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
+
+            if (registro) {
+                await registro.showNotification(titulo, {
+                    body: cuerpo,
+                    tag: etiqueta,
+                    icon: '/icons/icon-192x192.png',
+                    data: { onActionClick: { default: { operation: 'navigateLastFocusedOrOpen', url: ruta } } }
+                });
+                return true;
+            }
+
+            const notificacion = new Notification(titulo, { body: cuerpo, tag: etiqueta, icon: '/icons/icon-192x192.png' });
 
             notificacion.onclick = () => {
                 window.focus();

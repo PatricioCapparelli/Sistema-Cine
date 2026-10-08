@@ -10,7 +10,7 @@
             <a routerLink="/cartelera" routerLinkActive="activo">Cartelera</a>
             <a routerLink="/proximamente" routerLinkActive="activo">Próximamente</a>
         </div>
-        
+
         @if (authS.rolActual() === 'admin') {
         <details class="menu menu-admin" #menuAdmin>
             <summary>Administración <span class="flecha" aria-hidden="true"></span></summary>
@@ -30,10 +30,13 @@
     </nav>
 
     <div class="acciones">
+
         @if (authS.rolActual() === 'empleado' || authS.rolActual() === 'admin') {
         <a routerLink="/escaner" class="btn-empleado">Escanear entradas</a>
         }
-
+        @if (pwa.puedeInstalar()) {
+        <button type="button" class="btn-instalar" (click)="pwa.instalar()">Instalar app</button>
+        }
         @if (authS.usuarioActual(); as usuario) {
         <details class="menu menu-usuario" #menuUsuario>
             <summary aria-label="Menú de usuario">

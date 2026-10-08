@@ -86,7 +86,7 @@ export class ProximamenteService {
         let avisados = false;
 
         for (const aviso of pendientes.filter(a => !this.notificados.has(a.pelicula_id))) {
-            const mostrado = this.notificaciones.mostrar(
+            const mostrado = await this.notificaciones.mostrar(
                 'Ya hay entradas a la venta',
                 `Ya podés comprar entradas de "${aviso.nombre}".`,
                 `pelicula-${aviso.pelicula_id}`

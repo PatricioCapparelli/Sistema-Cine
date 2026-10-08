@@ -364,3 +364,21 @@ summary:focus-visible {
     font-size: 0.8rem;
     font-weight: 800;
 }
+
+.btn-instalar {
+    padding: 8px 18px;
+    background: transparent;
+    color: var(--estrellas);
+    border: 1px solid var(--estrellas);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-instalar:hover {
+    background: var(--estrellas);
+    color: var(--marron-oscuro);
+}
