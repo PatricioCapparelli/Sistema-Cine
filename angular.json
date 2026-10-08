@@ -35,7 +35,8 @@
               "canvg",
               "raf",
               "rgbcolor",
-              "core-js"
+              "core-js",
+              "sweetalert2"
             ]
           },
           "configurations": {
